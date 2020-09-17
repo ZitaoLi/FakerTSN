@@ -1,0 +1,102 @@
+@startuml Timer
+
+package POSIX_timer <<Frame>> {
+    class timer {
+        + timer_create()
+        + timer_delete()
+        + timer_settime()
+        + timer_gettime()
+        + timer_getoverrun()
+        + clock_gettime()
+    }
+}
+
+class TimeContext {
+    + get_timer()
+    .. singleton ..
+    - TimeContext()
+    + {static} get_instance()
+}
+
+package TimeSync <<Frame>> {
+
+package Time <<Frame>> {
+    class TimePoint
+    class TimeInterval
+}
+
+interface IClock {
+    now()
+}
+
+class RealTimeClock {
+
+}
+RealTimeClock -|> IClock
+RealTimeClock ..> timer
+RealTimeClock ..> TimePoint
+
+class TimePoint <<TimeSpec>> {
+    long sec
+    long nsec
+    operator+()
+    operator-()
+}
+TimePoint ..> TimeInterval
+TimePoint ..> timer
+
+class TimeInterval <<TimeSpec>> {
+    long sec
+    long nsec
+}
+TimeInterval ..> timer
+
+abstract Ticker {
+    + int id
+    + TimePoint start
+    + TimeInterval expire
+    + TimeInterval period
+    + operator()
+}
+Ticker *-- TimePoint
+Ticker *-- TimeInterval
+
+interface ITimer {
+    + add_ticker()
+    + remove_ticker()
+    + get_ticker()
+    + start()
+    + stop()
+}
+PQTimer -|> ITimer
+TimeContext --> ITimer
+
+abstract PQTimer {
+    - MinHeap<Ticker> tickers
+    - int timer_handle
+    .. callback ..
+    - {friend} on_alarm()
+}
+note left of PQTimer
+when posix timer expire, 
+on_alarm() is called to invoke ticker() 
+and set next timer from ticker heap
+end note
+PQTimer ..> timer
+PQTimer *-- IClock
+PQTimer "1" o-- "n" Ticker
+PQTimer *-- MinHeap
+PQTimer ..> TimePoint
+PQTimer ..> TimeInterval
+
+class MinHeap<T> {
+    T[] elements;
+    + get_first()
+    + attach()
+    - sift_up()
+    - sift_down()
+}
+
+}
+
+@enduml

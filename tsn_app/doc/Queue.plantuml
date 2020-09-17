@@ -1,0 +1,118 @@
+@startuml Queue
+
+package Timer <<Frame>> {
+    interface ITimer {
+    }
+}
+
+package Reactor <<Frame>> {
+    class Reactor {
+    }
+}
+
+package Queue <<Frame>> {
+    class QueueContext {
+        - Queue[] # ordered by pcp
+        - Pcp2Queue[][] # mapping from pcp to queue
+        - {friend} TransmissionSelection
+        + dequeue()()
+        + enqueue()
+    }
+    QueueContext "1" *-- "n" IQueue
+    QueueContext "1" *-- "1" TransmissionSelection
+    QueueContext <.. Reactor
+
+    class TransmissionSelection {
+        + dequeue()()
+    }
+    note top of TransmissionSelection
+    retrieve from Q#7 to Q#0
+    end note
+
+    interface IQueue {
+        + enqueue()
+        + dequeue()()
+        + is_active()
+        + is_empty()
+    }
+    IQueue <|- IEEE8021Queue
+
+    abstract IEEE8021Queue {
+        - InnerBuffer
+        - Algorithm
+        - int pcp # priority
+    }
+    ' Queue "n" *-- "1" IQueueCompenent
+    IEEE8021Queue *-- Algorithm
+    IEEE8021Queue *-- InnerBuffer
+    IEEE8021Queue <|- IEEE8021QbvQueue
+
+    class IEEE8021QbvQueue {
+        - Gate gate
+    }
+    IEEE8021QbvQueue *-- Gate
+
+    ' interface IQueueCompenent {
+    '     + on_scheduled()
+    ' }
+
+    abstract InnerBuffer {
+        - int pcp
+        - IFrameBody[]
+        + dequeue()()
+        + enqueue()
+        + is_empty()
+    }
+    InnerBuffer --o Algorithm
+    ' InnerBuffer <|- CreditBasedShaperAlgorithm
+    ' InnerBuffer <|- PriorityStrictAlgorithm
+
+    abstract Algorithm {
+        - int pcp
+        + dequeue()()
+    }
+    Algorithm --o Gate
+    Algorithm <|- NoFIFOAlgorithm
+    Algorithm <|- PSAlgorithm
+    CBSAlgorithm -|> Algorithm
+
+    class NoFIFOAlgorithm{
+        int index
+    }
+    NoFIFOAlgorithm ..> GateControlList
+
+    class Gate {
+        - int pcp
+        - bool isOpen
+        + set_open()
+        + dequeue()()
+        .. Observer ..
+        + register()
+        + on_update()
+    }
+    Gate "n" *--* "1" GateControlList
+
+    class GateControlList {
+        - Gate[] gates
+        - int index
+        - XML schedule
+        .. Singleton ..
+        - GateControlList()
+        + {static} get_instance()
+        .. Subject ..
+        + update_gates()
+        + append_gate()
+    }
+    ' EnhancementGateControlList -|> GateControlList
+    GateControlList <|- EnhancementGateControlList
+    GateControlList ..> ITimer
+
+    class EnhancementGateControlList {
+        - XML enhancementSchedule
+    }
+}
+
+interface IFrameBody
+InnerBuffer o-- IFrameBody
+
+@enduml

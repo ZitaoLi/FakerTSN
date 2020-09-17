@@ -1,0 +1,66 @@
+DIR_INC	= ./include
+DIR_SRC	= ./src
+DIR_SRC_SUBDIR = $(DIR_SRC)/subdir
+DIR_SRC_CORE = $(DIR_SRC)/core
+DIR_SRC_UTILS = $(DIR_SRC)/utils
+DIR_SRC_DEVICE = $(DIR_SRC)/device
+DIR_NETWORKING = $(DIR_SRC)/networking
+DIR_TEST= ./test
+DIR_BIN	= ./bin
+DIR_LIB	= ./lib
+
+SRCS  	:= $(wildcard *.cc)
+SRCS  	+= $(wildcard ${DIR_SRC}/*.cc) 
+SRCS  	+= $(wildcard ${DIR_SRC_SUBDIR}/*.cc)
+SRCS  	+= $(wildcard ${DIR_SRC_CORE}/*.cc)
+SRCS  	+= $(wildcard ${DIR_SRC_UTILS}/*.cc)
+SRCS  	+= $(wildcard ${DIR_SRC_DEVICE}/*.cc)
+SRCS  	+= $(wildcard ${DIR_NETWORKING}/*.cc)
+SRCS  	+= $(wildcard ${DIR_TEST}/*.cc)
+OBJS    := $(patsubst %.cc,${DIR_BIN}/%.o,$(patsubst %.cc,%.o,$(SRCS)))
+
+CC      := gcc
+CXX     := g++
+DEBUG 	:= y
+RM		:= rm -rf
+MAKE = 	:make
+LIBS    := -lpcap -lnet
+LDFLAGS :=
+DEFINES :=
+INCLUDES:= -I$(DIR_INC)
+CFLAGS  := -Wall $(DEFINES) $(INCLUDES)
+ifeq ($(DEBUG), y)
+CFLAGS	+= -g
+else
+CFLAGS	+= -O3
+endif
+CXXFLAGS:= $(CFLAGS) -std=c++11
+
+PROGRAM	:= tsn_app
+TARGET  := ${DIR_BIN}/${PROGRAM}
+
+.PHONY 	: all clean cleanall rebuild
+
+all: $(TARGET)
+
+# src
+${DIR_BIN}/%.o: $(DIR_SRC)/%.cc
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+# test
+${DIR_BIN}/%.o: $(DIR_TEST)/%.cc
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+# $@ represent all targets (executable files)
+# $^ represent all all dependencies (*.o files)
+$(TARGET) : $(OBJS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+rebuild: cleanall
+
+clean:
+	rm -rf *.so *.d *.o
+	find ${DIR_BIN} . -name '*.o' -exec $(RM) '{}' \;
+
+cleanall: clean
+	$(RM) -rf $(TARGET)

@@ -1,0 +1,54 @@
+@startuml ClassDiagram
+Object Reactor
+Object Selector
+Object IPort
+Object IEventHandler
+Object ReadEventHandler
+Object WriteEventHandler
+Object ConfigEventHandler
+Object IPortState
+Object CreationPortState
+Object UpPortState
+Object DownPortState
+Object PortManager
+Object TSNContext
+Object ITSNContextState
+Object InitTSNContextState
+Object RunTSNContextState
+Object StopTSNContextState
+Object DataPort
+Object ConfigPort
+Object ConsolePort
+Object TSNConfigurator
+
+IPort <|.. DataPort
+IPort <|.. ConfigPort
+IPort <|.. ConsolePort
+ConfigPort .. TSNConfigurator
+
+ITSNContextState <|.. InitTSNContextState
+ITSNContextState <|.. RunTSNContextState
+ITSNContextState <|.. StopTSNContextState
+
+TSNContext o-- PortManager
+TSNContext o--o ITSNContextState
+TSNContext o-- Reactor
+
+PortManager o-- IPort
+PortManager ..> IEventHandler
+PortManager ..> Reactor
+
+Reactor *-- Selector
+Reactor o-- IEventHandler
+IEventHandler <|.. ReadEventHandler
+IEventHandler <|.. WriteEventHandler
+IEventHandler <|.. ConfigEventHandler 
+Selector ..> IPort
+IEventHandler o-- IPort
+
+IPortState <|.. CreationPortState
+IPortState <|.. UpPortState
+IPortState <|.. DownPortState
+IPort o--o IPortState
+
+@enduml

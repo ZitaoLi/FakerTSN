@@ -1,0 +1,60 @@
+@startuml Reflector
+
+package "MARCO" <<Frame>> {
+    class Register_Bob
+    class ObjectFactory_Bob
+}
+
+interface ReflectObject {
+
+}
+
+interface Person {
+
+}
+Person -|> ReflectObject
+
+class Bob {
+
+}
+Bob -|> Person
+note bottom of Bob
+<size:10>~#define REFLECT(ClassName)</size> 
+end note
+
+interface ObjectFactory {
+    ReflectObject* new_instance()
+}
+ObjectFactory ..> ReflectObject
+
+class ObjectFactory_Bob {
+
+}
+ObjectFactory_Bob -|> ObjectFactory
+ObjectFactory_Bob ..> Bob
+
+class Reflector {
+    - Map<string, ObjectFactory> objectFactories
+    - ReflectObject* get_new_instance(const string&)
+    + void register_factory(const string&, ObjectFactory*)
+    + {static} T* get_new_instance(const string&)
+    + {static} Reflector& getReflector()
+}
+Reflector ..> ObjectFactory
+note top of Reflector
+template<typename T>
+T* getNewInstance(const std::string& className) {
+	return dynamic_cast<T*>(Reflector::getReflector().
+            getNewInstance(className));
+}
+
+Person* bob = Reflector::get_instance<Person>("Bob");
+end note
+
+class Register_Bob {
+
+}
+Register_Bob ..> Reflector
+Register_Bob ..> ObjectFactory_Bob
+
+@enduml

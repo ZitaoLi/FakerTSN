@@ -1,0 +1,10 @@
+@startuml TSNContext
+
+class TSNContext
+
+interface ITSNContext
+ITSNContext <|- InitTSNContext
+ITSNContext <|- RunTSNContext
+ITSNContext <|- StopTSNContext
+
+@enduml

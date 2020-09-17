@@ -1,0 +1,170 @@
+@startuml ConfigQeqChart
+
+box "main"
+    participant main
+end box
+
+box "TSN Context"
+    participant TSNContext
+    participant InitTSNContextState
+    participant RunTSNContextState
+    participant PortManager
+end box
+
+box "Reactor"
+    participant Reactor
+    participant Selector
+    participant ConfigRequestEventHandler
+    participant ConfigRespondEventHandler
+end box
+
+box "Port Context"
+    participant ConfigPort
+    participant CreationPortState
+    participant UpPortState
+end box
+
+create TSNContext
+main -> TSNContext : // singleton\n ::getInstance()
+create Reactor
+main -> Reactor : // singleton\n ::getInstance()
+create Selector
+Reactor -> Selector : new
+create InitTSNContextState
+main -> InitTSNContextState : new
+main -> InitTSNContextState : // state\n doAction()
+activate InitTSNContextState
+InitTSNContextState -> TSNContext : // state\n setState()
+activate TSNContext
+create PortManager
+TSNContext -> PortManager : new
+activate PortManager
+create ConfigPort
+PortManager -> ConfigPort : new
+create CreationPortState
+PortManager -> CreationPortState : new
+PortManager -> CreationPortState : // state\n doAction()
+activate CreationPortState
+CreationPortState -> ConfigPort : // template method\n createSockfd()
+activate ConfigPort
+ConfigPort --> CreationPortState
+deactivate ConfigPort
+CreationPortState -> ConfigPort : // template method\n setMacAddress()
+activate ConfigPort
+ConfigPort --> CreationPortState
+deactivate ConfigPort
+CreationPortState -> ConfigPort : // template method\n registHandler()
+activate ConfigPort
+ConfigPort --> CreationPortState
+deactivate ConfigPort
+CreationPortState -> ConfigPort : // state\n setState()
+activate ConfigPort
+create ConfigRequestEventHandler
+ConfigPort -> ConfigRequestEventHandler : new
+ConfigPort -> Reactor : // singleton\n ::getInstance()
+activate Reactor
+Reactor --> ConfigPort
+deactivate Reactor
+ConfigPort -> Reactor : // Reactor\n registHandler()
+activate Reactor
+Reactor --> ConfigPort
+deactivate Reactor
+deactivate ConfigPort
+create UpPortState
+CreationPortState -> UpPortState : new
+CreationPortState -> UpPortState : // state\n doAction()
+activate UpPortState
+UpPortState -> ConfigPort : // state\n setState()
+activate ConfigPort
+ConfigPort --> UpPortState
+deactivate ConfigPort
+UpPortState --> CreationPortState
+deactivate UpPortState
+CreationPortState --> PortManager
+deactivate CreationPortState
+PortManager --> TSNContext
+deactivate PortManager
+TSNContext --> InitTSNContextState
+deactivate TSNContext
+InitTSNContextState --> main
+deactivate InitTSNContextState
+
+create RunTSNContextState
+main -> RunTSNContextState : new
+main -> RunTSNContextState : // state\n doAction()
+activate RunTSNContextState
+RunTSNContextState -> TSNContext : // state\n setSate()
+activate TSNContext
+TSNContext -> Reactor : // singleton\n getInstance()
+activate Reactor
+Reactor --> TSNContext
+deactivate Reactor
+TSNContext -> Reactor : // Reactor\n handleEvents
+
+activate Reactor
+
+loop m_eventHandlerMap.size()
+Reactor -> Selector : // Reactor\n addHandler()
+end
+
+loop true
+Reactor -> Selector : // Reactor\n wait()
+activate Selector
+
+alt configuration case
+Reactor -> Selector : // Reactor\n wait()
+activate Selector
+Reactor -> ConfigRequestEventHandler : // Reactor\n handle()
+deactivate Selector
+activate ConfigRequestEventHandler
+create ConfigRespondEventHandler
+ConfigRequestEventHandler -> ConfigRespondEventHandler : // Reactor\n new
+ConfigRequestEventHandler -> Reactor : // Reactor\n removeHandler()
+ConfigRequestEventHandler -> Reactor : // Reactor\n registHandler()
+create TSNConfiguratorClient
+ConfigRequestEventHandler -> TSNConfiguratorClient : // singleton\n ::getInstance()
+ConfigRequestEventHandler -> TSNConfiguratorClient : requestConfig()
+activate TSNConfiguratorClient
+TSNConfiguratorClient --[#Blue]> TSNConfiguratorServer : // comm \n sendto
+activate TSNConfiguratorServer
+TSNConfiguratorClient --> ConfigRequestEventHandler
+deactivate ConfigRequestEventHandler
+
+loop until recv all data
+deactivate TSNConfiguratorClient
+Reactor -> Selector : // Reactor\n wait()
+activate Selector
+Selector <[#Blue]-- TSNConfiguratorServer : // comm\n recvfrom
+deactivate TSNConfiguratorServer
+deactivate Selector
+Reactor -> ConfigRespondEventHandler : // Reactor\n handle()
+activate ConfigRespondEventHandler
+ConfigRespondEventHandler -> TSNConfiguratorClient : writeBuffer
+activate TSNConfiguratorClient
+TSNConfiguratorClient --> ConfigRespondEventHandler
+deactivate TSNConfiguratorClient
+ConfigRespondEventHandler --> TSNConfiguratorClient : ack()
+activate TSNConfiguratorClient
+TSNConfiguratorClient --[#Blue]> TSNConfiguratorServer : ack
+TSNConfiguratorClient --> ConfigRespondEventHandler
+deactivate TSNConfiguratorClient
+deactivate ConfigRespondEventHandler
+end
+
+ConfigRespondEventHandler -> TSNContext : doConfig()
+activate TSNContext
+deactivate TSNContext
+ConfigRespondEventHandler -> Reactor : // Reactor\n removeHandler()
+activate Reactor
+Reactor --> ConfigRespondEventHandler
+deactivate Reactor
+
+ConfigRespondEventHandler -> PortManager : endableDataPort()
+' CreationPortState -> ConfigPort : // template method\n createSockfd()
+' CreationPortState -> ConfigPort : // template method\n setMacAddress()
+' CreationPortState -> ConfigPort : // template method\n registHandler()
+
+end
+end
+
+@enduml

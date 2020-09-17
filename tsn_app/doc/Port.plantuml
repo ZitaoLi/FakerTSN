@@ -1,0 +1,83 @@
+@startuml Port
+
+package ConfigComm <<Frame>> {
+    class TSNConfigSever
+    class TSNConfigClient
+    TSNConfigSever ..[#Blue] TSNConfigClient
+}
+' ConfigPort ..> TSNConfigClient
+TSNConfigClient <.. ConfigPort
+
+package Libpcap <<Frame>> {
+    class pcap_sniffer {
+        pcap_lookupdev()
+        pcap_close()
+        pcap_open_live()
+        pcap_next()
+        pcap_compile()
+        pcap_setfilter()
+    }
+}
+pcap_sniffer <.. IPort
+
+class PortManager <<TSN Context>> {
+    IPort[] ports
+    find_all_devices()
+    create_ports()
+}
+PortManager o-- IPort
+pcap_sniffer <.. PortManager
+
+interface IPort {
+    .. state ..
+    set_state()
+    .. networking ..
+    recv()
+    send()
+    .. Reactor ..
+    create_socket()
+    register_event_handler()
+}
+IPort <|- ConfigPort
+DataPort -|> IPort
+IPort <--> IPortState
+
+class DataPort {
+    int socketfd
+    IPortState state
+}
+class ConfigPort {
+    int socketfd
+    IPortState state
+}
+
+interface IPortState {
+    .. state ..
+    do_action()
+}
+CreationPortState -|> IPortState
+IPortState <|- DownPortState
+IPortState <|- UpPortState
+
+class CreationPortState {
+    IPort port
+}
+class UpPortState {
+    IPort port
+}
+class DownPortState {
+    IPort port
+}
+
+note bottom of CreationPortState
+.. template method ..
+do_action():
+    create_socket()
+    register_event_handler()
+end note
+
+interface IFrameBody
+IFrameBody <.. IPort
+TSNFrameBody -|> IFrameBody
+
+@enduml

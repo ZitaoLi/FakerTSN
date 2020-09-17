@@ -1,0 +1,28 @@
+@startuml TransmissionSelectionAlgorithm
+
+class GateControlList {
+    
+}
+
+package Algorithm <<Frame>> {
+    abstract Algorithm {
+        - int pcp
+        + get_frame()
+    }
+
+    class PriorityBaseAlgorithm {
+    }
+    PriorityBaseAlgorithm -|> Algorithm
+
+    class FaultTolerantAlgorithm {
+    }
+    FaultTolerantAlgorithm -|> Algorithm
+    FaultTolerantAlgorithm --> GateControlList
+
+    class CreditBasedAlgorithm {
+    }
+    CreditBasedAlgorithm -|> Algorithm
+}
+
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml Reactor
+
+enum EventType {
+    DATAIN
+    DATAOUT
+    DATAERROR
+}
+
+class Reactor {
+    Map<Handle, Pair<EventType, IEventHandler>> handlers
+    Selector selector
+    handle_events()
+    register_handler()
+    remove_handler()
+}
+note top of Reactor
+for (;;): /* infinite loop */
+    int n = selector.wait();
+    ...
+end note
+Reactor *-- Selector
+Reactor o-- IEventHandler
+Reactor o-- EventType
+
+class Selector {
+    add_handle()
+    remove_handle()
+    update_handle()
+    wait()
+}
+Selector --> IPort
+
+interface IPort <<Handle>> {
+
+}
+
+interface IEventHandler {
+    handle_event()
+}
+IEventHandler o-- IPort
+
+class ConcreteEventHandler {
+}
+ConcreteEventHandler -|> IEventHandler
+
+
+@enduml
