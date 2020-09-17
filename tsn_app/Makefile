@@ -84,6 +84,7 @@ cleanalltest:
 # tsn_app
 ${TARGET}:${OBJS}
 	for dir in $(DIR_LIB);do $(MAKE) -C $$dir all || exit 1; done
+	mkdir -p $(DIR_BIN)
 	$(CXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 # src
