@@ -16,6 +16,7 @@
 // #include "../../utils/reflector/Reflector.h"
 #include "../../utils/reflector/DynamicCreate.h"
 #include "TransmissionGate.h"
+#include "GateControlTicker.h"
 
 using namespace tinyxml2;
 
@@ -39,6 +40,7 @@ class GateControlListItem {
 };
 
 class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControlList, unsigned int> {
+   private:
     unsigned int m_portId;
     unsigned int m_gateSize;
     std::vector<std::shared_ptr<TransmissionGate>> m_gates; /* gate container */
@@ -49,22 +51,7 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
     virtual void loadScheduleXML(std::string filename);
 
    public:
-    GateControlList(unsigned int portId) : m_portId(portId) {
-        /* load config file */
-        std::string filename = "./config/gcl.xml";
-        this->loadScheduleXML(filename);
-        /* register ticker to timer */
-        Time::TimePoint start(0, 0);
-        for (GateControlListItem item : this->m_gcl) {
-            INFO(item.toString());
-            std::shared_ptr<Ticker> ticker = std::make_shared<Ticker>(
-                start,
-                item.m_timeInterval,
-                this->m_period);
-            TimeContext::getInstance().getTimer()->addTicker(ticker);
-            start += item.m_timeInterval;
-        }
-    }
+    GateControlList(unsigned int portId);
 
     virtual ~GateControlList() = default;
 
@@ -85,7 +72,7 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
             gate->onUpdate();
         }
     }
-};  // namespace faker_tsn
+};
 
 }  // namespace faker_tsn
 

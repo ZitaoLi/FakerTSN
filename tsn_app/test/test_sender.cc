@@ -24,6 +24,7 @@ static void TestSend() {
         unsigned char buffer[ETH_FRAME_LEN];
     };  // ethframe
 
+    // const char* deviceName = "eth1";
     const char* deviceName = "h1-eth0";
     // const char* deviceName = "ens33";
 
@@ -37,7 +38,7 @@ static void TestSend() {
     unsigned char mac[8];
     LinkLayerInterface::getMacAddress(deviceName)->getRaw(mac);
 
-    int frameNum = 2;
+    int frameNum = 1;
     for (int i = 1; i <= frameNum; i++) {
         INFO("Encode frame");
         /* construct ethernet header */
@@ -47,6 +48,7 @@ static void TestSend() {
         memcpy(&eth_hdr.h_dest, dest, ETH_ALEN);   // set dest mac
         memcpy(&eth_hdr.h_source, mac, ETH_ALEN);  // set src mac
         // don't set ETH_P_8021Q, it will ceause receiver to discard vlan tag
+        // eth_hdr.h_proto = htons(ETH_P_8021Q);  // set IEEE 802.1Q protocol
         eth_hdr.h_proto = htons(ETH_P_ALL);  // set IEEE 802.1Q protocol
         INFO("dest mac = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&eth_hdr.h_dest), 6));
         INFO("src mac = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&eth_hdr.h_source), 6));
@@ -64,7 +66,8 @@ static void TestSend() {
         struct vlan_hdr vlan_tag;
         memset(&vlan_tag, 0x00, sizeof(vlan_tag));
         memcpy(&vlan_tag.h_vlan_TCI, &tci, sizeof(tci));        // set TCI
-        vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
+        // vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
+        vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_TSN);  // set IEEE 1722 protocol
         INFO("TCI = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_TCI), 2));
         INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_encapsulated_proto), 2));
 
@@ -113,7 +116,7 @@ static void TestSend() {
         if (sendto(sockfd, frame.buffer, frame_len, 0, (struct sockaddr*)&saddrll, sizeof(saddrll)) > 0)
             INFO("Send success!");
         else
-            INFO("Error, could not send");
+            ERROR("Error, could not send");
     }
 
     close(sockfd);

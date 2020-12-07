@@ -31,6 +31,7 @@ git-src
 
 # Custom rules
 ./tsn_app/.vscode
+.vscode
 ./tsn_app/bin
 ./tsn_app/out
 *.a

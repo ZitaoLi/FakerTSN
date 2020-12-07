@@ -4,6 +4,34 @@ namespace faker_tsn {
 
 // REFLECT(GateControlList);
 
+GateControlList::GateControlList(unsigned int portId) : m_portId(portId) {
+    /* load config file */
+    std::string filename = "./config/gcl.xml";
+    this->loadScheduleXML(filename);
+    
+    /* register ticker to timer */
+    if (this->m_gcl.size() != 0) {
+        Time::TimePoint startTime(0, 0);
+        GateControlListItem item = this->m_gcl[0];
+        INFO(item.toString());
+        std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
+            startTime,
+            item.m_timeInterval);
+        TimeContext::getInstance().getTimer()->addTicker(ticker);
+    }
+    
+    // Time::TimePoint start(0, 0);
+    // for (GateControlListItem item : this->m_gcl) {
+    //     INFO(item.toString());
+    //     std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
+    //         start,
+    //         item.m_timeInterval,
+    //         this->m_period);
+    //     TimeContext::getInstance().getTimer()->addTicker(ticker);
+    //     start += item.m_timeInterval;
+    // }
+}
+
 void GateControlList::loadScheduleXML(std::string filename) {
     XMLDocument doc;
     doc.LoadFile(filename.c_str());
@@ -12,7 +40,8 @@ void GateControlList::loadScheduleXML(std::string filename) {
     const char* timeUnit = schedule->Attribute("timeUnit");
     long interval = atoi(schedule->FirstChildElement("cycle")->GetText());
     INFO("interval:" + std::to_string(interval));
-    Time::TimeInterval timeInterval = Time::converIntegerToTimeInterval(interval, timeUnit);
+    Time::TimeInterval hyperPeriod = Time::converIntegerToTimeInterval(interval, timeUnit);
+    this->m_period = hyperPeriod;
     /* get gate control list items */
     XMLElement* device = schedule->FirstChildElement("switch");
     while (!strcmp(device->Attribute("name"), ConfigSetting::getInstance().get<const char*>("deviceName"))) {

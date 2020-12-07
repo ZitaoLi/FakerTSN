@@ -25,6 +25,10 @@ class MulticastMacTable {
         std::vector<PORT_INDEX_TYPE> ports; /* outbound ports */
         long long timeout;                  /* timeout */
 
+        ForwardItem(unsigned short vlanID, std::vector<unsigned short>& ports, long long timeout = -1) : vlanID(vlanID), ports(ports), timeout(timeout) {}
+
+        ForwardItem(std::vector<unsigned short>& ports, long long timeout = -1) : vlanID(1), ports(ports), timeout(timeout) {}
+
         std::string toString() {
             std::stringstream ss;
             ss << "VID: " << vlanID << " ";
@@ -47,7 +51,7 @@ class MulticastMacTable {
     static void loadRouteXML(std::string filename);
 
     /* add a item into multicast mac table */
-    static void addItem(const unsigned char* mac, std::vector<PORT_INDEX_TYPE>& port, long long timeout);
+    static void addItem(const unsigned char* mac, std::vector<PORT_INDEX_TYPE>& ports, unsigned short vlanID, long long timeout);
 
     /* remove items by multicast mac address */
     static void removeItem(const unsigned char* mac);

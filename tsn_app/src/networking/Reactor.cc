@@ -65,12 +65,12 @@ int Reactor::handle_events(std::chrono::duration<int, std::milli> timeout) {
             auto mapTypeHandler = this->m_handlers[fd];
 
             if (events->at(i).events & EPOLLIN) {
-                INFO("READ EVENT on socket: " + std::to_string(fd));
+                INFO("\033[32;0mREAD EVENT on socket: " + std::to_string(fd) + "\033[0m");
                 EVENT_TYPE type = toEventType(EPOLLIN);
                 auto handler = mapTypeHandler[type];
                 handler->handle_event(type);
             } else if (events->at(i).events & EPOLLOUT) {
-                INFO("WRITE EVENT on socket: " + std::to_string(fd));
+                INFO("\033[32;0mWRITE EVENT on socket: " + std::to_string(fd) + "\033[0m");
                 EVENT_TYPE type = toEventType(EPOLLOUT);
                 auto handler = mapTypeHandler[type];
                 handler->handle_event(type);

@@ -24,6 +24,7 @@ static void TestRecv() {
         unsigned char buffer[ETH_FRAME_LEN];
     };
 
+    // const char* deviceName = "eth1";
     const char* deviceName = "h3-eth0";
 
     /* create raw socket */
@@ -55,6 +56,7 @@ static void TestRecv() {
     saddrll.sll_ifindex = ifindex;                            // set index
     saddrll.sll_halen = ETH_ALEN;                             // set address length
     saddrll.sll_protocol = htons(ETH_P_ALL);                  // set protocp
+    // saddrll.sll_protocol = htons(ETH_P_8021Q);                  // set protocp
     memcpy((void*)(saddrll.sll_addr), (void*)mac, ETH_ALEN);  // set mac
     INFO("construct link layer address (sockaddr_ll) struct");
 
@@ -74,8 +76,19 @@ static void TestRecv() {
             // if (recvfrom(sockfd, recvbuf, ETH_FRAME_LEN, 0, NULL, NULL) > 0) {
             INFO("recv success!");
         } else {
-            INFO("recv failed!");
+            ERROR("recv failed!");
         }
+
+        // TODO filter non-TSN frame
+        // dest mac != interface mac
+        // ether protocol != htons(ETH_P_ALL)
+        // if (memcmp(recvbuf, saddrll.sll_addr, 6) != 0 ||
+        //     memcmp(recvbuf + 12, &saddrll.sll_protocol, 2) != 0) {
+        //     // INFO("------------- Non-TSN frame --------------");
+        //     continue;
+        // } else {
+        //     // INFO("------------- TSN frame  --------------");
+        // }
 
         // construct frame
         // union ethframe* frame = (union ethframe*)recvbuf;

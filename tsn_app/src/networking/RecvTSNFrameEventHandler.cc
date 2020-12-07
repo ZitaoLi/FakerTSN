@@ -2,6 +2,8 @@
 
 namespace faker_tsn {
 
+const __be16 RecvTSNFrameEventHandler::s_protocol = htons(ETH_P_TSN);
+
 RecvTSNFrameEventHandler::RecvTSNFrameEventHandler(
     HANDLE handle, struct sockaddr_ll& sockAddrII) : m_handle(handle) {
     memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
@@ -25,7 +27,14 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
         INFO("Recv error!");
     }
 
-    // /* filter non-TSN frame */
+    /* filter ring packet */
+    /* because the frame send to interface will be receive again */
+    if (memcmp(recvbuf + 6, this->m_sockAddrII.sll_addr, 6) == 0) {
+        // INFO("------------- ring frame --------------");
+        return;
+    }
+
+    // TODO handle un-matched dest mac
     // if (memcmp(recvbuf, this->m_sockAddrII.sll_addr, 6) != 0) {
     //     INFO("------------- Non-TSN frame --------------");
     //     return;
@@ -33,12 +42,10 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     //     INFO("------------- TSN frame  --------------");
     // }
 
-    // TODO 
-    unsigned char destMac[ETH_ALEN] = {0x01, 0x00, 0x5E, 0x00, 0x00, 0x01};
-    unsigned char src[ETH_ALEN];
-    memcpy(src, &this->m_sockAddrII.sll_addr, ETH_ALEN);
-    if (memcmp(recvbuf, destMac, 6) != 0 || memcmp(recvbuf + 6, src, 6) == 0) {
+    /* filter non-TSN frame */
+    if (memcmp(recvbuf + 16, &RecvTSNFrameEventHandler::s_protocol, 2) != 0) { // security issue may occur here
         INFO("------------- Non-TSN frame --------------");
+        // TODO handle using non-TSN method
         return;
     } else {
         INFO("------------- TSN frame  --------------");
@@ -73,12 +80,15 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     INFO("data(string) = " + std::string(reinterpret_cast<char*>(recvbuf) + 24));
 
     /* forward frame */
+    // TODO identify whether the frame is TSN frame or not
+    unsigned char destMac[ETH_ALEN];
     unsigned char srcMac[ETH_ALEN];
+    memcpy(destMac, recvbuf, ETH_ALEN);
     memcpy(srcMac, recvbuf + 6, ETH_ALEN);
     RELAY_ENTITY type = IEEE_802_1Q_TSN_FRAME;
     if (this->m_isEnhanced)
         type = IEEE_802_1Q_TSN_FRAME_E;
-    ForwardFunction::forward(srcMac, reinterpret_cast<void*>(frame), sizeof(frame), type);
+    ForwardFunction::forward(srcMac, destMac, reinterpret_cast<void*>(frame), sizeof(frame), type);
 }
 
 HANDLE RecvTSNFrameEventHandler::getHandle() {

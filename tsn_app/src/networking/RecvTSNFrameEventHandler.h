@@ -35,6 +35,9 @@ class RecvTSNFrameEventHandler : public IEventHandler {
 
     /* hook method that returns smart pointer of HANDLE */
     virtual HANDLE getHandle() override;
+
+   public:
+    static const __be16 s_protocol;
 };
 
 }  // namespace faker_tsn

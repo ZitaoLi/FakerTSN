@@ -231,6 +231,14 @@ class Ticker {
         this->period = period;
     }
 
+    Ticker(Time::TimePoint& start, Time::TimeInterval& expire) {
+        Ticker::s_id++;
+        this->m_isPeriodic = false;
+        this->start = start;
+        this->expire = expire;
+        this->period = Time::TimeInterval(0, 0);
+    }
+
     /* functor needed to be rewrite by user */
     virtual void operator()(){};
 
@@ -277,9 +285,9 @@ class Ticker {
 
     std::string toString() {
         std::stringstream ss;
-        ss << "StartTime" << this->start.toString() << " ";
-        ss << "ExpireTime" << this->expire.toString() << " ";
-        ss << "PeriodTime" << this->period.toString();
+        ss << "StartTime<" << this->start.toString() << "> ";
+        ss << "ExpireTime<" << this->expire.toString() << "> ";
+        ss << "PeriodTim<e" << this->period.toString() << ">";
         return ss.str();
     }
 };
@@ -308,6 +316,9 @@ class ITimer : public ReflectObject {
 
     /* remove ticker by id*/
     virtual void removeTicker(unsigned long id) = 0;
+
+    /* print timer */
+    virtual std::string toString() = 0;
 };
 
 }  // namespace faker_tsn

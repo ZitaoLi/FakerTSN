@@ -29,7 +29,7 @@ endef
 # The last command is necessary to ensure our preparation instructions remain compatible with the patching system.
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	rsync -av --progress $(SOURCE_DIR)/* $(PKG_BUILD_DIR) --exclude bin --exclude *.d --exclude *.a --exclude *.o --exclude *.so --exclude xmltest --exclude tsn_app 
+	rsync -av --progress $(SOURCE_DIR)/* $(PKG_BUILD_DIR) --exclude bin/* --exclude *.d --exclude *.a --exclude *.o --exclude *.so --exclude xmltest --exclude tsn_app 
 	mkdir -p $(PKG_BUILD_DIR)/bin
 	$(Build/Patch)
 endef

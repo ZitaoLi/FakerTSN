@@ -53,7 +53,8 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     struct vlan_hdr vlan_tag;
     memset(&vlan_tag, 0x00, sizeof(vlan_tag));
     memcpy(&vlan_tag.h_vlan_TCI, &tci, sizeof(tci));        // set TCI
-    vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
+    // vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
+    vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_TSN);  // set IEEE 1722 protocol
     INFO("TCI = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_TCI), 2));
     INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_encapsulated_proto), 2));
 

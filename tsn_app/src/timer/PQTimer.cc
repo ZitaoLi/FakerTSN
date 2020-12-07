@@ -6,6 +6,7 @@
 
 #include "../utils/Log.h"
 #include "../utils/reflector/Reflector.h"
+#include "TimeContext.h"
 #include "IClock.h"
 
 namespace faker_tsn {
@@ -27,6 +28,20 @@ void onAlarm(int sig, siginfo_t* si, void* ucontext) {
         printf("    timer_getoverrun");
     else
         printf("    overrun count = %d\n", _or);
+
+    /* get timer */
+    ITimer* timer = TimeContext::getInstance().getTimer();
+    /* get first ticker */
+    std::shared_ptr<Ticker> ticker = timer->getTicker();
+    if (ticker) {
+        INFO(ticker->toString());
+        /* call handler */
+        (*ticker)();
+        /* remove this ticker */
+        timer->removeTicker();
+    } else {
+        INFO("empty timer");
+    }
 
     // ucontext_t* context = (ucontext_t*)ucontext;
     // std::cout << "Timer Address = " << si->_sifields._timer.si_sigval.sival_ptr << std::endl;
@@ -117,7 +132,7 @@ LOOP:
     /* get first ticker */
     std::shared_ptr<Ticker> ticker = this->getTicker();
     INFO("Get Ticker : " + ticker->toString());
-    this->removeTicker();
+    // this->removeTicker();
 
     /* set timer */
     this->setTimer(ticker);

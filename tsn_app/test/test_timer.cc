@@ -158,7 +158,7 @@ static void TestPQTimer() {
     INFO("is periodic: " + std::to_string(ticker1->isPeriodic()));
 
     // start += Time::TimeInterval(2, 0);
-    Time::TimeInterval expire2 = Time::TimeInterval(2, 0);  // +4s
+    Time::TimeInterval expire2 = Time::TimeInterval(2, 0);
     INFO("Start Time = " + start.toString());
     INFO("Expire Time = " + expire.toString());
     INFO("Period Time = " + period.toString());
@@ -168,6 +168,7 @@ static void TestPQTimer() {
 
     timer.addTicker(ticker1);
     timer.addTicker(ticker2);
+    // timer.showTickers();
     timer.start();
 
     while (true) {
@@ -175,7 +176,25 @@ static void TestPQTimer() {
 }
 
 static void TestTimeContext() {
-    TimeContext::getInstance().getTimer();
+    ITimer* timer = TimeContext::getInstance().getTimer();
+    IClock* clock = Reflector::getNewInstance<IClock>("RealTimeClock");
+    INFO(clock->now().toString());
+
+    Time::TimePoint start = clock->now();
+    Time::TimeInterval expire = Time::TimeInterval(4, 0);  // +4s
+    Time::TimeInterval period(0, 0);
+    INFO("Start Time = " + start.toString());
+    INFO("Expire Time = " + expire.toString());
+    INFO("Period Time = " + period.toString());
+    std::shared_ptr<Ticker> ticker1 = std::make_shared<Ticker>(start, expire, period);
+    INFO("Ticker ID: " + std::to_string(ticker1->getId()));
+    INFO("is periodic: " + std::to_string(ticker1->isPeriodic()));
+
+    timer->addTicker(ticker1);
+    timer->start();
+
+    while (true) {
+    }
 }
 
 TEST(TEST_TIMER, TEST_CLOCK_GET_TIME) {
@@ -193,7 +212,7 @@ TEST(TEST_TIMER, TEST_TIMER_SET_TIME) {
 }
 
 TEST(TEST_TIMER, TEST_PQTIMER) {
-    TestPQTimer();
+    // TestPQTimer();
 }
 
 TEST(TEST_TIMER, TEST_TIME_CONTEXT) {

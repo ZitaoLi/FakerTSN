@@ -9,7 +9,10 @@ namespace faker_tsn {
 
 class ForwardFunction {
    public:
-    static void forward(const unsigned char* srcMac, void* data, size_t len, RELAY_ENTITY type);
+    static void forward(const unsigned char* srcMac, const unsigned char* destMac, void* data, size_t len, RELAY_ENTITY type);
+
+   public:
+    static const char s_multicastPrefix;
 };
 
 }  // namespace faker_tsn

@@ -67,6 +67,8 @@ class PQTimer : public ITimer {
             this->m_tickers.pop();
         }
     }
+
+    std::string toString() {}
 };
 
 }  // namespace faker_tsn
