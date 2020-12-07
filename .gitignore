@@ -33,6 +33,7 @@ git-src
 ./tsn_app/.vscode
 .vscode
 ./tsn_app/bin
+./tsn_app/bin/*
 ./tsn_app/out
 *.a
 *.o
