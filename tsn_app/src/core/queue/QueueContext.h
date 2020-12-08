@@ -13,6 +13,7 @@
 #include "IEEE8021Queue.h"
 #include "IQueue.h"
 #include "TransmissionSelection.h"
+#include "GateControlList.h"
 
 namespace faker_tsn {
 
@@ -24,6 +25,7 @@ class QueueContext {
     unsigned short m_portIndex;
     std::vector<std::shared_ptr<IQueue>> m_queues;  // queues
     TransmissionSelection m_transmissionSelection;  // transmission selection function
+    std::shared_ptr<GateControlList> m_gcl;         // gate control list
 
    public:
     friend class TransmissionSelection;

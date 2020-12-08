@@ -111,8 +111,8 @@ void DataPort::createSocket() {
     }
 
     /* create QueueContext */
-    this->m_queueContext.reset(new QueueContext(this->m_deviceID));
     INFO("Create QueueConext");
+    this->m_queueContext.reset(new QueueContext(this->m_deviceID));
 
     /* mac address */
     // char hwaddr[ETH_ALEN];

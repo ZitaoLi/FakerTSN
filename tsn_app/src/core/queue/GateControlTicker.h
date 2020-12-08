@@ -3,21 +3,26 @@
 
 #include "../../timer/ITimer.h"
 #include "../../utils/Log.h"
+#include "GateControlList.h"
 
 namespace faker_tsn
 {
 
 class GateControlTicker : public Ticker {
+private:
+    GateControlList* m_gcl;
 
 public:
-    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period) : Ticker(start, expire, period) {}
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period);
 
-    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire) : Ticker(start, expire) {}
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire);
+
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period, GateControlList* gcl);
+
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, GateControlList* gcl);
 
     /* handler */
-    void operator()() override {
-        INFO("oncall GateControlTicker");
-    }
+    void operator()() override;
 };
     
 } // namespace faker_tsn

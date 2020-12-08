@@ -1,22 +1,43 @@
 #include "GateControlList.h"
+#include "GateControlTicker.h"
 
 namespace faker_tsn {
 
 // REFLECT(GateControlList);
 
-GateControlList::GateControlList(unsigned int portId) : m_portId(portId) {
+std::string GateControlList::toString() {
+    std::stringstream ss;
+    for (int i = 0; i < this->m_gateSize; i++) {
+        if (this->m_gates[i]->isOpen()) {
+            ss << "1";
+        } else {
+            ss << "0";
+        }
+    }
+    return ss.str();
+}
+
+GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_length(0), m_cursor(0), m_gateSize(8) {
     /* load config file */
+    INFO("[" + std::to_string(this->m_portId) + "] load gcl.xml");
     std::string filename = "./config/gcl.xml";
     this->loadScheduleXML(filename);
-    
+
+    /* initialize gates */
+    for (int i = 0; i < this->m_gateSize; i++) {
+        
+    }
+
     /* register ticker to timer */
+    INFO("[" + std::to_string(this->m_portId) + "] register ticker to timer");
     if (this->m_gcl.size() != 0) {
         Time::TimePoint startTime(0, 0);
-        GateControlListItem item = this->m_gcl[0];
-        INFO(item.toString());
+        GateControlListItem item = this->m_gcl[this->m_cursor];
+        INFO("[" + std::to_string(this->m_portId) + "] " + item.toString());
         std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
             startTime,
-            item.m_timeInterval);
+            item.m_timeInterval,
+            this);
         TimeContext::getInstance().getTimer()->addTicker(ticker);
     }
     
@@ -39,7 +60,7 @@ void GateControlList::loadScheduleXML(std::string filename) {
     /* get period */
     const char* timeUnit = schedule->Attribute("timeUnit");
     long interval = atoi(schedule->FirstChildElement("cycle")->GetText());
-    INFO("interval:" + std::to_string(interval));
+    INFO("hyper period:\t" + std::to_string(interval));
     Time::TimeInterval hyperPeriod = Time::converIntegerToTimeInterval(interval, timeUnit);
     this->m_period = hyperPeriod;
     /* get gate control list items */
@@ -55,8 +76,8 @@ void GateControlList::loadScheduleXML(std::string filename) {
     while (entry) {
         long length = atoi(entry->FirstChildElement("length")->GetText());
         std::bitset<8> bitvector(std::string(entry->FirstChildElement("bitvector")->GetText()));
-        INFO(std::to_string(length));
-        INFO(bitvector.to_string());
+        INFO("interval:\t" + std::to_string(length));
+        INFO("states:\t" + bitvector.to_string());
         this->m_gcl.emplace_back(
             Time::converIntegerToTimeInterval(length, timeUnit),
             bitvector

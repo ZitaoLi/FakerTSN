@@ -28,6 +28,10 @@ class TransmissionGate {
         this->m_isOpen = state;
     }
 
+    inline bool isOpen() {
+        return this->m_isOpen;
+    }
+
     /* dequeue head frame */
     IFrameBody* dequeue();
 
@@ -37,7 +41,7 @@ class TransmissionGate {
     void registerGCL();
 
     /* callable funtion */
-    void onUpdate();
+    void onUpdate(uint8_t pcp, bool isOpen);
 };
 
 }  // namespace faker_tsn
