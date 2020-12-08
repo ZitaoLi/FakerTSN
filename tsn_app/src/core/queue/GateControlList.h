@@ -16,7 +16,6 @@
 #include "../../utils/config/ConfigSetting.h"
 // #include "../../utils/reflector/Reflector.h"
 #include "../../utils/reflector/DynamicCreate.h"
-#include "TransmissionGate.h"
 
 using namespace tinyxml2;
 
@@ -39,12 +38,14 @@ class GateControlListItem {
     }
 };
 
+class TransmissionGate;
+
 class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControlList, unsigned int> {
    private:
     unsigned int m_length;                                  /* length of CGL */
     unsigned int m_cursor;                                  /* pointer of current item */
     unsigned int m_portId;
-    unsigned int m_gateSize;                                // TODO no. of gates
+    unsigned int m_gateSize;                                // TODO no. of gates, default is 8
     std::vector<std::shared_ptr<TransmissionGate>> m_gates; /* gate container */
     std::vector<GateControlListItem> m_gcl;                 /* gate control list (GCL) */
     Time::TimeInterval m_period;                            /* scheduling period */
@@ -66,21 +67,10 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
     /*** Obeserver Pattern ***/
 
     /* append gate */
-    inline void appendGate(std::shared_ptr<TransmissionGate> gate) {
-        this->m_gates.push_back(gate);
-    }
+    void appendGate(std::shared_ptr<TransmissionGate> gate);
 
     /* update all gates */
-    inline void updateGates() {
-        auto item = this->m_gcl[this->m_cursor];
-        for (int i = 0; i < this->m_gateSize; i++) {
-            if (item.m_gateStates.test(i)) {
-                this->m_gates[i]->onUpdate(i, true); // open gate
-            } else {
-                this->m_gates[i]->onUpdate(i, false); // close gate
-            }
-        }
-    }
+    void updateGates();
 };
 
 }  // namespace faker_tsn

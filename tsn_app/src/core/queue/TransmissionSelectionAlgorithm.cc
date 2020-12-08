@@ -11,7 +11,7 @@ TransmissionSelectionAlgorithm::~TransmissionSelectionAlgorithm() {
 }
 
 IFrameBody* TransmissionSelectionAlgorithm::dequeue() {
-    IFrameBody* frame = this->dequeue();
+    IFrameBody* frame = this->m_innerBuffer->dequeue();
     if (frame != nullptr)
         return frame;
     return nullptr;

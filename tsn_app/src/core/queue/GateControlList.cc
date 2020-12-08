@@ -1,5 +1,6 @@
 #include "GateControlList.h"
 #include "GateControlTicker.h"
+#include "TransmissionGate.h"
 
 namespace faker_tsn {
 
@@ -25,7 +26,7 @@ GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_leng
 
     /* initialize gates */
     for (int i = 0; i < this->m_gateSize; i++) {
-        
+
     }
 
     /* register ticker to timer */
@@ -83,6 +84,23 @@ void GateControlList::loadScheduleXML(std::string filename) {
             bitvector
         );
         entry = entry->NextSiblingElement();
+    }
+}
+
+/* append gate */
+void GateControlList::appendGate(std::shared_ptr<TransmissionGate> gate) {
+    this->m_gates.push_back(gate);
+}
+
+/* update all gates */
+void GateControlList::updateGates() {
+    auto item = this->m_gcl[this->m_cursor];
+    for (int i = 0; i < this->m_gateSize; i++) {
+        if (item.m_gateStates.test(i)) {
+            this->m_gates[i]->onUpdate(i, true); // open gate
+        } else {
+            this->m_gates[i]->onUpdate(i, false); // close gate
+        }
     }
 }
 

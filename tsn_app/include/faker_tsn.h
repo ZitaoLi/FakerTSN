@@ -16,6 +16,7 @@
 #include "../src/core/queue/GateControlTicker.h"
 #include "../src/core/queue/IQueue.h"
 #include "../src/core/queue/IEEE8021Queue.h"
+#include "../src/core/queue/IEEE8021QbvQueue.h"
 #include "../src/networking/EventType.h"
 #include "../src/networking/IEventHandler.h"
 #include "../src/networking/Reactor.h"

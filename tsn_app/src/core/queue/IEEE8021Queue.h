@@ -30,6 +30,31 @@ class IEEE8021Queue : public IQueue, public REFLECT_OBJECT, public DynamicCreato
         return "IEEE8021Queue";
     }
 
+    /* get pcp */
+    uint8_t getPCP() {
+        return this->m_pcp;
+    }
+
+    /* get pcp */
+    uint8_t getPortIndex() {
+        return this->m_portIndex;
+    }
+
+    /* get device name */
+    std::string getDeviceName() {
+        return this->m_deviceName;
+    }
+
+    /* get innner buffer */
+    std::shared_ptr<InnerBuffer> getInnerBuffer() {
+        return this->m_innerBuffer;
+    }
+
+    /* get transmission algorithm */
+    std::shared_ptr<TransmissionSelectionAlgorithm> getTransmissionSelectionAlgorithm() {
+        return this->m_transmissionSelectionAlgorithm;
+    }
+
     /* enqueue frame body */
     virtual void enqueue(IFrameBody* frameBody) override;
 

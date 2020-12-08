@@ -34,18 +34,15 @@ IFrameBody* IEEE8021Queue::dequeue() {
 }
 
 bool IEEE8021Queue::isEmpty() {
-    // TODO
-    return false;
+    return this->m_innerBuffer->isEmpty();
 }
 
 unsigned int IEEE8021Queue::getCapacity() {
-    // TODO
-    return 0;
+    return this->m_innerBuffer->getCapacity();
 }
 
 unsigned int IEEE8021Queue::getResidualCapacity() {
-    // TODO
-    return 0;
+    return this->m_innerBuffer->getResidualCapacity();
 }
 
 }  // namespace faker_tsn

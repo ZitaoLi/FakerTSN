@@ -5,12 +5,12 @@
 #include <memory>
 
 #include "../../networking/frame/IFrameBody.h"
-#include "GateControlList.h"
 #include "TransmissionSelectionAlgorithm.h"
+#include "GateControlList.h"
 
 namespace faker_tsn {
 
-class TransmissionGate {
+class TransmissionGate : std::enable_shared_from_this<TransmissionGate> {
    private:
     uint8_t m_pcp;
     bool m_isOpen;
@@ -38,7 +38,7 @@ class TransmissionGate {
     /* Observer pattern */
 
     /* register into GateControlList */
-    void registerGCL();
+    void registerGCL(std::shared_ptr<GateControlList>& gcl);
 
     /* callable funtion */
     void onUpdate(uint8_t pcp, bool isOpen);
