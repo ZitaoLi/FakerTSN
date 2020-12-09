@@ -1,20 +1,55 @@
 #include "IEEE8021QbvQueue.h"
 
+#include "../../utils/config/ConfigSetting.h"
+
 namespace faker_tsn
 {
 
-IEEE8021QbvQueue::IEEE8021QbvQueue(unsigned short portIndex, uint8_t pcp) : IEEE8021Queue(portIndex, pcp) {
+IEEE8021QbvQueue::IEEE8021QbvQueue(unsigned short portIndex, uint8_t pcp) {
+    ConfigSetting& cs = ConfigSetting::getInstance();
+    this->m_deviceName = cs.get<std::string>("deviceName");
+    INFO("Construct " + this->m_deviceName + ".port" + std::to_string(portIndex) + ".queue" + std::to_string(pcp));
+
+    /* initialize innner buffer */
+    int capacity = cs.get<int>("switch.queue.capacity");
+    this->m_innerBuffer = std::make_shared<InnerBuffer>(portIndex, pcp, capacity);
+
+    /* initialize transimssion selection algorithm */
+    std::string transmissionSelectionAlgorithmClass = cs.get<std::string>("switch.queue.transmissionSelectionAlgorithm");
+    this->m_transmissionSelectionAlgorithm = std::make_shared<TransmissionSelectionAlgorithm>(this->m_innerBuffer);
+
     /* initialize transmission gate */
-    this->m_gate = std::make_shared<TransmissionGate>(this->getTransmissionSelectionAlgorithm());
+    this->m_transmissionGate = std::make_shared<TransmissionGate>(this->getTransmissionSelectionAlgorithm());
 }
 
 IEEE8021QbvQueue::~IEEE8021QbvQueue() {};
 
-// TODO
-// IFrameBody* IEEE8021QbvQueue::dequeue() {
-//     INFO(this->getDeviceName() + ".port" + std::to_string(this->getPortIndex()) + ".queue" + std::to_string(this->getPCP()) + " dequeue");
+/* enqueue frame body */
+void IEEE8021QbvQueue::enqueue(IFrameBody* frameBody) {
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " enqueue");
 
-//     return nullptr;
-// }
+    this->m_innerBuffer->enqueue(frameBody);
+}
+
+/* get frame body from queue */
+IFrameBody* IEEE8021QbvQueue::dequeue() {
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " dequeue");
+
+    if (this->m_transmissionGate->isOpen())
+        return this->m_transmissionGate->dequeue();
+    return nullptr;
+}
+
+bool IEEE8021QbvQueue::isEmpty() {
+    return this->m_innerBuffer->isEmpty();
+}
+
+unsigned int IEEE8021QbvQueue::getCapacity() {
+    return this->m_innerBuffer->getCapacity();
+}
+
+unsigned int IEEE8021QbvQueue::getResidualCapacity() {
+    return this->m_innerBuffer->getResidualCapacity();
+}
     
 } // namespace faker_tsn

@@ -65,6 +65,31 @@ class Hello : public REFLECT_OBJECT, public DynamicCreator<Hello, int> {
     }
 };
 
+class IAnimal {
+public:
+    virtual ~IAnimal() = default;
+    virtual void Say() = 0;
+};
+
+class Dog : public IAnimal, public REFLECT_OBJECT, public DynamicCreator<Dog> {
+public:
+    Dog() { INFO("construct a dog"); }
+    virtual ~Dog() override = default;
+
+    virtual void Say() override {
+        INFO("wang\n");
+    }
+};
+
+// class TaiDi : public Dog, public REFLECT_OBJECT, public DynamicCreator<TaiDi> {
+//     TaiDi() { INFO("construct a taidi"); }
+//     virtual ~TaiDi() override = default;
+
+//     virtual void Say() override {
+//         INFO("wang wang wang\n");
+//     }
+// };
+
 }  // namespace faker_tsn
 
 using namespace faker_tsn;
@@ -97,6 +122,9 @@ static void TestDynamicCreate() {
     std::cout << "----------------------------------------------------------------------" << std::endl;
     REFLECT_OBJECT* queue = REFLECTOR::CreateByTypeName(std::string("faker_tsn::IEEE8021Queue"), (unsigned short)1, (uint8_t)1);
     queue->Say();
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+    REFLECT_OBJECT* dog = REFLECTOR::CreateByTypeName(std::string("faker_tsn::Dog"));
+    dog->Say();
 }
 
 TEST(TEST_REFLECTOR, TEST_REFLECTOR) {

@@ -17,7 +17,7 @@ class TransmissionGate : std::enable_shared_from_this<TransmissionGate> {
     std::shared_ptr<TransmissionSelectionAlgorithm> m_algorithm;
 
    public:
-    TransmissionGate(std::shared_ptr<TransmissionSelectionAlgorithm> algorithm) : m_isOpen(false) {
+    TransmissionGate(std::shared_ptr<TransmissionSelectionAlgorithm> algorithm) : m_isOpen(true) {
         this->m_algorithm = algorithm;
         this->m_pcp = algorithm->getPCP();
     }
