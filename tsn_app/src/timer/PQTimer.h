@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <queue>
 #include <vector>
 
@@ -18,16 +19,21 @@ namespace faker_tsn {
 class PQTimer : public ITimer {
    private:
     std::priority_queue<
-        std::shared_ptr<Ticker>,
-        std::vector<std::shared_ptr<Ticker>>,
-        std::greater<std::shared_ptr<Ticker>>>
+        Ticker*,
+        std::vector<Ticker*>,
+        std::greater<Ticker*>>
         m_tickers;                   /* ticker heap */
+    std::unordered_map<
+        long long, 
+        Ticker*> 
+        m_timers;                    /* <timer, ticker> */
     timer_t m_timerHandle;           /* timer handle */
     struct sigevent m_evp;           /* signal event struct */
     struct timespec m_spec;          /* time specification struct */
     struct itimerspec m_timeValue;   /* initial timer specification struct */
     struct sigaction m_sigAction;    /* signal action struct */
     std::shared_ptr<IClock> m_clock; /* clock */
+    long long m_precision;           /* precision */
 
     friend void onAlarm(int signo);
 
@@ -42,17 +48,23 @@ class PQTimer : public ITimer {
     /* stop timer */
     virtual void stop() override;
 
+    /* get precision */
+    long long getPrecision() override;
+
     /* set timer */
-    virtual void setTimer(std::shared_ptr<Ticker>& ticker);
+    virtual void setTimer(Ticker* ticker);
 
     /* get ticker */
-    virtual std::shared_ptr<Ticker> getTicker() override;
+    virtual Ticker* getTicker() override;
 
     /* get ticker by id */
-    virtual std::shared_ptr<Ticker> getTicker(unsigned long id) override;
+    virtual Ticker* getTicker(unsigned long id) override;
+
+    /* get ticker by timerid */
+    virtual Ticker* getTickerBy(long long id) override;
 
     /* add ticker */
-    virtual void addTicker(std::shared_ptr<Ticker>& ticker) override;
+    virtual void addTicker(Ticker* ticker) override;
 
     /* remove ticker */
     virtual void removeTicker() override;

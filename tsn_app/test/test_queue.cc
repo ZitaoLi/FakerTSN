@@ -48,15 +48,27 @@ static void TestIEEE8021QbvQueue() {
 
     // create a frame
     unsigned char data[100] = "hello world";
-    TSNFrameBody* frame = new TSNFrameBody();
-    frame->setPCP(7);
-    frame->setVID(1);
-    frame->setSeq(0);
-    frame->setType(IEEE_802_1Q_TSN_FRAME_E);
-    frame->setData(data, 100);
+    TSNFrameBody* iFrame = new TSNFrameBody();
+    iFrame->setPCP(7);
+    iFrame->setVID(1);
+    iFrame->setSeq(0);
+    iFrame->setType(IEEE_802_1Q_TSN_FRAME_E);
+    iFrame->setData(data, 100);
 
     // input frame into queue
-    port1->input((void*)frame, 100, IEEE_802_1Q_TSN_FRAME_E);
+    port1->input((void*)iFrame, 100, IEEE_802_1Q_TSN_FRAME_E);
+
+    // output frame from queue
+    std::shared_ptr<QueueContext> qContext = dynamic_pointer_cast<DataPort>(port1)->getQueueContext();
+    IFrameBody* oFrame = qContext->dequeue();
+
+    // start
+    TimeContext::getInstance().getTimer()->start();
+
+    while (true)
+    {
+        /* code */
+    }
 }
 
 TEST(TEST_QUEUE, TEST_GATE_CONTROL_LIST) {

@@ -6,6 +6,7 @@ namespace faker_tsn {
 
 // REFLECT(GateControlList);
 
+// TODO
 std::string GateControlList::toString() {
     std::stringstream ss;
     for (int i = 0; i < this->m_gateSize; i++) {
@@ -18,16 +19,11 @@ std::string GateControlList::toString() {
     return ss.str();
 }
 
-GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_length(0), m_cursor(0), m_gateSize(8) {
+GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_length(0), m_cursor(0), m_gateSize(0) {
     /* load config file */
     INFO("[" + std::to_string(this->m_portId) + "] load gcl.xml");
     std::string filename = "./config/gcl.xml";
     this->loadScheduleXML(filename);
-
-    /* initialize gates */
-    for (int i = 0; i < this->m_gateSize; i++) {
-
-    }
 
     /* register ticker to timer */
     INFO("[" + std::to_string(this->m_portId) + "] register ticker to timer");
@@ -35,23 +31,12 @@ GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_leng
         Time::TimePoint startTime(0, 0);
         GateControlListItem item = this->m_gcl[this->m_cursor];
         INFO("[" + std::to_string(this->m_portId) + "] " + item.toString());
-        std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
+        Ticker* ticker = new GateControlTicker(
             startTime,
             item.m_timeInterval,
             this);
         TimeContext::getInstance().getTimer()->addTicker(ticker);
     }
-    
-    // Time::TimePoint start(0, 0);
-    // for (GateControlListItem item : this->m_gcl) {
-    //     INFO(item.toString());
-    //     std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
-    //         start,
-    //         item.m_timeInterval,
-    //         this->m_period);
-    //     TimeContext::getInstance().getTimer()->addTicker(ticker);
-    //     start += item.m_timeInterval;
-    // }
 }
 
 void GateControlList::loadScheduleXML(std::string filename) {
@@ -60,6 +45,7 @@ void GateControlList::loadScheduleXML(std::string filename) {
     XMLElement* schedule = doc.RootElement();
     /* get period */
     const char* timeUnit = schedule->Attribute("timeUnit");
+    INFO("time unit: \t" + std::string(timeUnit));
     long interval = atoi(schedule->FirstChildElement("cycle")->GetText());
     INFO("hyper period:\t" + std::to_string(interval));
     Time::TimeInterval hyperPeriod = Time::converIntegerToTimeInterval(interval, timeUnit);
@@ -77,8 +63,7 @@ void GateControlList::loadScheduleXML(std::string filename) {
     while (entry) {
         long length = atoi(entry->FirstChildElement("length")->GetText());
         std::bitset<8> bitvector(std::string(entry->FirstChildElement("bitvector")->GetText()));
-        INFO("interval:\t" + std::to_string(length));
-        INFO("states:\t" + bitvector.to_string());
+        INFO("interval:\t" + std::to_string(length) + "\tstates:\t" + bitvector.to_string());
         this->m_gcl.emplace_back(
             Time::converIntegerToTimeInterval(length, timeUnit),
             bitvector
@@ -87,13 +72,22 @@ void GateControlList::loadScheduleXML(std::string filename) {
     }
 }
 
+/* get current item */
+GateControlListItem GateControlList::getCurrentItem() {
+    return this->m_gcl[this->m_cursor];
+}
+
 /* append gate */
 void GateControlList::appendGate(std::shared_ptr<TransmissionGate> gate) {
-    this->m_gates.push_back(gate);
+    INFO("[" + std::to_string(m_portId) + "] append a gate");
+    this->m_gates.push_back(std::move(gate));
+    this->m_gateSize += 1;
 }
 
 /* update all gates */
 void GateControlList::updateGates() {
+    INFO("[" + std::to_string(this->m_portId) + "] update gates");
+    INFO("[" + std::to_string(this->m_portId) + "] -> " + this->m_gcl[this->m_cursor].toString());
     auto item = this->m_gcl[this->m_cursor];
     for (int i = 0; i < this->m_gateSize; i++) {
         if (item.m_gateStates.test(i)) {
@@ -102,6 +96,7 @@ void GateControlList::updateGates() {
             this->m_gates[i]->onUpdate(i, false); // close gate
         }
     }
+    this->m_cursor++; // move to next item
 }
 
 }  // namespace faker_tsn

@@ -120,6 +120,10 @@ static void TestDynamicCreate() {
     REFLECT_OBJECT* gcl = REFLECTOR::CreateByTypeName(std::string("faker_tsn::GateControlList"), 1U);
     gcl->Say();
     std::cout << "----------------------------------------------------------------------" << std::endl;
+    const uint8_t id = 0;
+    REFLECT_OBJECT* _gcl = REFLECTOR::CreateByTypeName(std::string("faker_tsn::GateControlList"), (unsigned int)id);
+    _gcl->Say();
+    std::cout << "----------------------------------------------------------------------" << std::endl;
     REFLECT_OBJECT* queue = REFLECTOR::CreateByTypeName(std::string("faker_tsn::IEEE8021Queue"), (unsigned short)1, (uint8_t)1);
     queue->Say();
     std::cout << "----------------------------------------------------------------------" << std::endl;

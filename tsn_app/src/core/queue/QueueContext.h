@@ -25,7 +25,6 @@ class QueueContext {
     unsigned short m_portIndex;
     std::vector<std::shared_ptr<IQueue>> m_queues;  // queues
     TransmissionSelection m_transmissionSelection;  // transmission selection function
-    std::shared_ptr<GateControlList> m_gcl;         // gate control list
 
    public:
     friend class TransmissionSelection;
@@ -33,6 +32,9 @@ class QueueContext {
     QueueContext(unsigned short potrIndex);
 
     ~QueueContext();
+
+    /* get queues */
+    std::vector<std::shared_ptr<IQueue>> getQueues();
 
     /* enqueue */
     void enqueue(IFrameBody* frameBody);

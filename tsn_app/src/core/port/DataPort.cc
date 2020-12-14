@@ -1,4 +1,5 @@
 #include "DataPort.h"
+#include "../../utils/config/ConfigSetting.h"
 
 #include <sys/socket.h>
 
@@ -114,6 +115,24 @@ void DataPort::createSocket() {
     INFO("Create QueueConext");
     this->m_queueContext.reset(new QueueContext(this->m_deviceID));
 
+    /* create GateControlList */
+    ConfigSetting& cs = ConfigSetting::getInstance();
+    std::string enabledTSN = cs.get<std::string>("enabledTSN");
+    if (enabledTSN == "yes") {
+        std::string gclClass = "faker_tsn::" + cs.get<std::string>("switch.gcl");
+        INFO("[" + std::string(this->m_deviceName) + "][" + std::to_string(this->m_deviceID) + "] Create " + gclClass);
+        std::shared_ptr<GateControlList> gcl(dynamic_cast<GateControlList*>(REFLECTOR::CreateByTypeName(gclClass, (unsigned int)this->m_deviceID)));
+        this->m_gcl = gcl;
+        // GateControlList* gcl = dynamic_cast<GateControlList*>(REFLECTOR::CreateByTypeName(gclClass, (unsigned int)this->m_deviceID));
+        // this->m_gcl.reset(gcl);
+        std::vector<std::shared_ptr<IQueue>> queues = this->m_queueContext->getQueues();
+        for (std::shared_ptr<IQueue> queue: queues) {
+            auto gate = std::dynamic_pointer_cast<IEEE8021QbvQueue>(queue)->getTransmissionGate();
+            gate->registerGCL(this->m_gcl);
+        }
+        this->m_gcl->updateGates();
+    }
+
     /* mac address */
     // char hwaddr[ETH_ALEN];
     // if (PortManager::findMacAddress(shared_from_this(), this->getDeviceName(), hwaddr)) {
@@ -212,6 +231,10 @@ void DataPort::input(void* data, size_t len, RELAY_ENTITY type) {
         frame->setType(type);
         this->m_queueContext->enqueue(reinterpret_cast<EnhancementTSNFrameBody*>(data));
     }
+}
+
+std::shared_ptr<QueueContext> DataPort::getQueueContext() {
+    return this->m_queueContext;
 }
 
 }  // namespace faker_tsn

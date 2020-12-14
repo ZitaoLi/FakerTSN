@@ -14,13 +14,13 @@ QueueContext::QueueContext(unsigned short portIndex) : m_portIndex(portIndex) {
         std::shared_ptr<IQueue> queue(dynamic_cast<IQueue*>(REFLECTOR::CreateByTypeName("faker_tsn::" + queueClass, (unsigned short)this->m_portIndex, static_cast<uint8_t>(pcp))));
         this->m_queues.push_back(std::move(queue));
     }
-
-    /* initialize gcl */
-    GateControlList* gcl = dynamic_cast<GateControlList*>(REFLECTOR::CreateByTypeName(std::string("faker_tsn::GateControlList"), 1U));
-    this->m_gcl.reset(gcl);
 }
 
 QueueContext::~QueueContext() {}
+
+std::vector<std::shared_ptr<IQueue>> QueueContext::getQueues() {
+    return this->m_queues;
+}
 
 /* enqueue */
 void QueueContext::enqueue(IFrameBody* frame) {

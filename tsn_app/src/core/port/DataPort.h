@@ -11,6 +11,8 @@
 #include "../../networking/frame/TSNFrameBody.h"
 #include "../../networking/interface/LinkLayerInterface.h"
 #include "../queue/QueueContext.h"
+#include "../queue/IEEE8021Queue.h"
+#include "../queue/IEEE8021QbvQueue.h"
 #include "IPort.h"
 #include "PortManager.h"
 
@@ -25,6 +27,7 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort> {
     int m_inSockfd;                                  /* socket for receiving */
     int m_outSockfd;                                 /* socket for sending */
     std::shared_ptr<QueueContext> m_queueContext;    /* queue context */
+    std::shared_ptr<GateControlList> m_gcl;          /* gate control list */
     std::shared_ptr<LinkLayerInterface> m_interface; /* link layer interface */
     std::shared_ptr<IPortState> state;               /* port state */
     int m_eventTypes = 0;                            /* event type */
@@ -96,6 +99,9 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort> {
         ss << "]";
         return ss.str();
     }
+
+    /* get queue context */
+    std::shared_ptr<QueueContext> getQueueContext();
 };
 
 }  // namespace faker_tsn

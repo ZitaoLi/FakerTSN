@@ -55,6 +55,29 @@ class Time {
             return *this;
         }
 
+        friend bool operator>=(const TimeInterval& timeInterval1, const TimeInterval& timeInterval2) {
+            if (timeInterval1.sec < timeInterval2.sec) {
+                return false;
+            } else if ((timeInterval1.sec == timeInterval2.sec) && (timeInterval1.nsec < timeInterval2.nsec)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        friend TimeInterval operator-(const TimeInterval& timeInterval1, const TimeInterval& timeInterval2) {
+            Time::TimeInterval _itv;
+            long _t = timeInterval1.nsec - timeInterval2.nsec;
+            if (_t >= 0) {
+                _itv.sec = timeInterval1.sec - timeInterval2.sec;
+                _itv.nsec = _t;
+            } else {
+                _itv.sec = timeInterval1.sec - timeInterval2.sec - 1;
+                _itv.nsec = 1000000000 + _t;
+            }
+            return _itv;
+        }
+
         std::string toString() {
             std::string info;
             info += "Sec: " + std::to_string(this->sec);
@@ -158,6 +181,34 @@ class Time {
             return *this;
         }
 
+        bool operator==(const TimePoint &timePoint) const {
+            if (this->sec == timePoint.sec && this->nsec == timePoint.nsec)
+                return true;
+            return false;
+        }
+
+        bool operator!=(const TimePoint &timePoint) const {
+            if (this->sec == timePoint.sec && this->nsec == timePoint.nsec)
+                return false;
+            return true;
+        }
+
+        /* this function is used to compare with 0, don't use it to compare with another */
+        bool operator==(const long long &time) const {
+            if (time == 0) {
+                return (this->sec == 0 && this->nsec == 0);
+            }
+            return false;
+        }
+
+        /* this function is used to compare with 0, don't use it to compare with another */
+        bool operator!=(const long long &time) const {
+            if (time == 0) {
+                return !(this->sec == 0 && this->nsec == 0);
+            }
+            return true;
+        }
+
         std::string toString() {
             std::stringstream ss;
             ss << "Sec: ";
@@ -217,11 +268,14 @@ class Time {
 
 class Ticker {
    private:
-    static unsigned long s_id; /* ticker id */
-    bool m_isPeriodic;         /* periodic flag */
-    Time::TimePoint start;     /* start time */
-    Time::TimeInterval expire;    /* expire time */
-    Time::TimeInterval period; /* period time */
+    static unsigned long s_id;      /* ticker id */
+    bool m_isPeriodic;              /* periodic flag */
+    Time::TimePoint start;          /* start time */
+    Time::TimeInterval expire;      /* expire time */
+    Time::TimeInterval period;      /* period time */
+    Time::TimePoint createTime;     /* create time */
+    Time::TimeInterval startOffset; /* statr offset */
+    Time::TimePoint launchTime;     /* launch time */
    public:
     Ticker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period) {
         Ticker::s_id++;
@@ -229,6 +283,20 @@ class Ticker {
         this->start = start;
         this->expire = expire;
         this->period = period;
+        this->createTime.setNow();
+        this->startOffset = Time::TimeInterval(0, 0);
+        this->launchTime = Time::TimePoint(0, 0);
+    }
+
+    Ticker(Time::TimeInterval& startoffset, Time::TimeInterval& expire, Time::TimeInterval& period) {
+        Ticker::s_id++;
+        (period.sec == 0 && period.nsec == 0) ? this->m_isPeriodic = false : this->m_isPeriodic = true;
+        this->start = Time::TimePoint(0, 0);
+        this->expire = expire;
+        this->period = period;
+        this->createTime.setNow();
+        this->startOffset = startoffset;
+        this->launchTime = Time::TimePoint(0, 0);
     }
 
     Ticker(Time::TimePoint& start, Time::TimeInterval& expire) {
@@ -237,6 +305,20 @@ class Ticker {
         this->start = start;
         this->expire = expire;
         this->period = Time::TimeInterval(0, 0);
+        this->createTime.setNow();
+        this->startOffset = Time::TimeInterval(0, 0);
+        this->launchTime = Time::TimePoint(0, 0);
+    }
+
+    Ticker(Time::TimeInterval& startOffset, Time::TimeInterval& expire) {
+        Ticker::s_id++;
+        this->m_isPeriodic = false;
+        this->start = Time::TimePoint(0, 0);
+        this->expire = expire;
+        this->period = Time::TimeInterval(0, 0);
+        this->createTime.setNow();
+        this->startOffset = startOffset;
+        this->launchTime = Time::TimePoint(0, 0);
     }
 
     /* functor needed to be rewrite by user */
@@ -271,6 +353,22 @@ class Ticker {
         this->period = period;
     }
 
+    inline void setCreateTime(Time::TimePoint createTime) {
+        this->createTime = createTime;
+    }
+
+    inline void setStartOffset(Time::TimeInterval startOffset) {
+        this->startOffset = startOffset;
+    }
+
+    inline void setLanunchTime(Time::TimePoint launchTime) {
+        this->launchTime = launchTime;
+    }
+
+    inline void setLaunchTime(Time::TimePoint time) {
+        this->launchTime = time + this->startOffset;
+    }
+
     inline Time::TimeInterval getExpire() const {
         return this->expire;
     };
@@ -283,11 +381,24 @@ class Ticker {
         return this->period;
     }
 
+    inline Time::TimePoint getCreateTime() const {
+        return this->createTime;
+    }
+    
+    inline Time::TimeInterval getStartOffset() const {
+        return this->startOffset;
+    }
+
+    inline Time::TimePoint getLanunchTime() const {
+        return this->launchTime;
+    }
+
     std::string toString() {
         std::stringstream ss;
         ss << "StartTime<" << this->start.toString() << "> ";
         ss << "ExpireTime<" << this->expire.toString() << "> ";
-        ss << "PeriodTim<e" << this->period.toString() << ">";
+        ss << "PeriodTime<" << this->period.toString() << "> ";
+        ss << "CreateTime<" << this->createTime.toString() << ">";
         return ss.str();
     }
 };
@@ -302,14 +413,20 @@ class ITimer : public ReflectObject {
     /* stop timer */
     virtual void stop() = 0;
 
+    /* get precision */
+    virtual long long getPrecision() = 0;
+
     /* get ticker */
-    virtual std::shared_ptr<Ticker> getTicker() = 0;
+    virtual Ticker* getTicker() = 0;
 
     /* get ticker by id */
-    virtual std::shared_ptr<Ticker> getTicker(unsigned long id) = 0;
+    virtual Ticker* getTicker(unsigned long id) = 0;
+
+    /* get ticker by id */
+    virtual Ticker* getTickerBy(long long timerid) = 0;
 
     /* add ticker */
-    virtual void addTicker(std::shared_ptr<Ticker>& ticker) = 0;
+    virtual void addTicker(Ticker* ticker) = 0;
 
     /* remove ticker */
     virtual void removeTicker() = 0;

@@ -30,10 +30,8 @@ class GateControlListItem {
 
     std::string toString() {
         std::stringstream ss;
-        ss << "\n";
-        ss << "TimeInterval: " << this->m_timeInterval.toString();
-        ss << "\n";
-        ss << "GateStates: " << this->m_gateStates.to_string();
+        ss << "TimeInterval(" << this->m_timeInterval.toString() << ") ";
+        ss << "GateStates(" << this->m_gateStates.to_string() << ")";
         return ss.str();
     }
 };
@@ -45,7 +43,7 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
     unsigned int m_length;                                  /* length of CGL */
     unsigned int m_cursor;                                  /* pointer of current item */
     unsigned int m_portId;
-    unsigned int m_gateSize;                                // TODO no. of gates, default is 8
+    unsigned int m_gateSize;                                /* no. of gates */
     std::vector<std::shared_ptr<TransmissionGate>> m_gates; /* gate container */
     std::vector<GateControlListItem> m_gcl;                 /* gate control list (GCL) */
     Time::TimeInterval m_period;                            /* scheduling period */
@@ -58,9 +56,13 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
 
     virtual ~GateControlList() = default;
 
+    /* get port index */
     inline unsigned int getPortId() {
         return this->m_portId;
     }
+
+    /* get current item */
+    GateControlListItem getCurrentItem();
 
     std::string toString();
 

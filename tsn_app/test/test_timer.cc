@@ -153,7 +153,7 @@ static void TestPQTimer() {
     INFO("Start Time = " + start.toString());
     INFO("Expire Time = " + expire.toString());
     INFO("Period Time = " + period.toString());
-    std::shared_ptr<Ticker> ticker1 = std::make_shared<Ticker>(start, expire, period);
+    Ticker* ticker1 = new Ticker(start, expire, period);
     INFO("Ticker ID: " + std::to_string(ticker1->getId()));
     INFO("is periodic: " + std::to_string(ticker1->isPeriodic()));
 
@@ -162,7 +162,7 @@ static void TestPQTimer() {
     INFO("Start Time = " + start.toString());
     INFO("Expire Time = " + expire.toString());
     INFO("Period Time = " + period.toString());
-    std::shared_ptr<Ticker> ticker2 = std::make_shared<Ticker>(start, expire2, period);
+    Ticker* ticker2 = new Ticker(start, expire2, period);
     INFO("Ticker ID: " + std::to_string(ticker2->getId()));
     INFO("is periodic: " + std::to_string(ticker2->isPeriodic()));
 
@@ -186,7 +186,7 @@ static void TestTimeContext() {
     INFO("Start Time = " + start.toString());
     INFO("Expire Time = " + expire.toString());
     INFO("Period Time = " + period.toString());
-    std::shared_ptr<Ticker> ticker1 = std::make_shared<Ticker>(start, expire, period);
+    Ticker* ticker1 = new Ticker(start, expire, period);
     INFO("Ticker ID: " + std::to_string(ticker1->getId()));
     INFO("is periodic: " + std::to_string(ticker1->isPeriodic()));
 

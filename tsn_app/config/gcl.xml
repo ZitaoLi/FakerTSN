@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <schedule timeUnit="us">
 	<!-- us -->
-	<cycle>400000</cycle>
+	<cycle>400000</cycle> <!-- 400 ms -->
 	
 	<switch name="switch1">
 		<port id="0">
