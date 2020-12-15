@@ -70,6 +70,7 @@ void GateControlList::loadScheduleXML(std::string filename) {
             bitvector
         );
         entry = entry->NextSiblingElement();
+        this->m_length++;
     }
 }
 
@@ -99,7 +100,7 @@ void GateControlList::updateGates() {
             this->m_gates[i]->onUpdate(i, false); // close gate
         }
     }
-    this->m_cursor++; // move to next item
+    this->m_cursor = (this->m_cursor + 1) % this->m_length; // move to next item
 }
 
 }  // namespace faker_tsn

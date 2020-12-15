@@ -1,6 +1,8 @@
 #include "GateControlTicker.h"
 #include "../../utils/config/ConfigSetting.h"
 #include "../../utils/reflector/Reflector.h"
+#include "../../networking/Reactor.h"
+#include "../../core/TSNContext.h"
 
 namespace faker_tsn
 {
@@ -17,13 +19,13 @@ void GateControlTicker::operator()() {
     INFO("oncall GateControlTicker");
     if (!this->m_gcl) {
         ERROR("GCL not be setted");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
-    INFO(this->m_gcl->toString());
+
+    /* refresh gates */
+    this->m_gcl->updateGates();
 
     /* set a new ticker */
-    GateControlListItem item = this->m_gcl->getCurrentItem();
-    Time::TimePoint nextStartTime(0, 0);
     // current clock time
     Time::TimePoint nowTime = Reflector::getNewInstance<IClock>("RealTimeClock")->now();
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] now\t\t " + nowTime.toString());
@@ -37,21 +39,28 @@ void GateControlTicker::operator()() {
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] deviation\t " + deviation.toString());
     // precision
     Time::TimeInterval precision = Time::converIntegerToTimeInterval(TimeContext::getInstance().getTimer()->getPrecision(), "ns");
-    INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] precision\t " + interval1.toString());
+    INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] precision\t " + precision.toString());
     if (deviation >= precision) {
         ERROR("[" + std::to_string(this->m_gcl->getPortId()) + "] out of precision");
-        exit(EXIT_FAILURE);
+        // TODO record
     }
     // next ideal interval
+    GateControlListItem item = this->m_gcl->getCurrentItem();
+    Time::TimePoint nextStartTime(0, 0);
     Time::TimeInterval interval2 = item.m_timeInterval - deviation;
-    INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] interval2 " + interval1.toString());
-    std::shared_ptr<Ticker> ticker = std::make_shared<GateControlTicker>(
+    INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] interval2 " + interval2.toString());
+    Ticker* ticker = new GateControlTicker(
         nextStartTime,
         interval2,
         this->m_gcl);
+    TimeContext::getInstance().getTimer()->addTicker(ticker);
 
-    /* refresh gates */
-    this->m_gcl->updateGates();
+    /* enable timer */
+    TimeContext::getInstance().getTimer()->start();
+
+    /* enable EPOLLOUT event */
+    auto port = TSNContext::getInstance().getPortManager()->getPort(this->m_gcl->getPortId());
+    Reactor::getInstance().getDemultoplexer().updateHandle(port->getOutSockfd(), EPOLLOUT);
 }
     
 } // namespace faker_tsn

@@ -58,7 +58,7 @@ std::vector<const char*>& PortManager::getAllDeviceName()
 
 std::shared_ptr<IPort> PortManager::getPort(uint8_t index)
 {
-    return this->m_ports.at(index - 1);
+    return this->m_ports.at(index);
 };
 
 // this function may not work properly in virtual environment, e.g., VMWare

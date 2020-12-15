@@ -35,9 +35,7 @@ void IEEE8021QbvQueue::enqueue(IFrameBody* frameBody) {
 IFrameBody* IEEE8021QbvQueue::dequeue() {
     INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " dequeue, gate stats = " + std::to_string(this->m_transmissionGate->isOpen()));
 
-    if (this->m_transmissionGate->isOpen())
-        return this->m_transmissionGate->dequeue();
-    return nullptr;
+    return this->m_transmissionGate->dequeue();
 }
 
 bool IEEE8021QbvQueue::isEmpty() {

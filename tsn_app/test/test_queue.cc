@@ -45,6 +45,9 @@ static void TestIEEE8021QbvQueue() {
     std::shared_ptr<IPort> port1 = std::make_shared<DataPort>(name1);
     std::shared_ptr<IPortState> creationState1 = std::make_shared<CreationPortState>();
     creationState1->doAction(port1);
+    // std::shared_ptr<IPort> port2 = std::make_shared<DataPort>(name1);
+    // std::shared_ptr<IPortState> creationState2 = std::make_shared<CreationPortState>();
+    // creationState2->doAction(port2);
 
     // create a frame
     unsigned char data[100] = "hello world";

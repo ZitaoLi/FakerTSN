@@ -37,10 +37,13 @@ static void Sender() {
     MacTable::loadRouteXML("./config/routes.xml");
     MulticastMacTable::loadRouteXML("./config/routes.xml");
 
+    // start timer
+    TimeContext::getInstance().getTimer()->start();
+
     // enable reactor
     Reactor::getInstance().handle_events();
 }
 
-TEST(TEST_H1_SENDER, SENDER) {
+TEST(TEST_H2_FORWARD, FORWARD1) {
     Sender();
 }

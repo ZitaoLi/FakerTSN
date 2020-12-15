@@ -16,6 +16,7 @@ IFrameBody* TransmissionSelection::dequeue(QueueContext* queueContext) {
         if (frame != nullptr)
             return frame;
     }
+    return nullptr;
 }
 
 }  // namespace faker_tsn

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <time.h>
+#include <errno.h>
 
 #include "../utils/Log.h"
 #include "../utils/reflector/Reflector.h"
@@ -18,7 +19,7 @@ void onAlarm(int sig, siginfo_t* si, void* ucontext) {
     assert(sig == SIGRTMAX);
     INFO("ON ALARM");
     IClock* clock = Reflector::getNewInstance<IClock>("RealTimeClock");
-    INFO(clock->now().toString());
+    INFO("now <" + clock->now().toString() + ">");
 
     // timer_t* tidp = si->si_value.sival_ptr;
     printf("    sival_ptr = %p\n", si->si_value.sival_ptr);
@@ -37,7 +38,7 @@ void onAlarm(int sig, siginfo_t* si, void* ucontext) {
 
     /* get first ticker */
     // std::shared_ptr<Ticker> ticker = timer->getTicker();
-    INFO(ticker->toString());
+    INFO("Callback Ticker: " + ticker->toString());
     /* call handler */
     (*ticker)();
     
@@ -115,7 +116,7 @@ void PQTimer::setTimer(Ticker* ticker) {
     struct sigevent evp;
     timer_t timerid;
     memset(&evp, 0, sizeof(evp));
-    evp.sigev_value.sival_ptr = ticker;    // timer handle
+    evp.sigev_value.sival_ptr = ticker;     // pointer of ticker
     evp.sigev_notify = SIGEV_SIGNAL;        // signal   
     evp.sigev_signo = SIGRTMAX;             // max real time signal
     // clock source CLOCK_REALTIME is settable and can be affected by system time changing caused by NTP or PTP
@@ -139,16 +140,16 @@ void PQTimer::setTimer(Ticker* ticker) {
     } else {
         Time::TimePoint now = Reflector::getNewInstance<IClock>("RealTimeClock")->now();
         ticker->setLaunchTime(now);
-        Time::TimePoint launchTime = ticker->getLanunchTime();
-        Time::TimePoint tp = launchTime + ticker->getExpire();
+        Time::TimeInterval tp = ticker->getExpire();
         INFO("Set Sec = " + std::to_string(tp.sec) + ", Nsec = " + std::to_string(tp.nsec));
 
         struct itimerspec its;
         memset(&its, 0, sizeof(its));
         its.it_value.tv_sec = tp.sec;
         its.it_value.tv_nsec = tp.nsec;
-        if (timer_settime(timerid, TIMER_ABSTIME, &its, NULL) == -1) {
+        if (timer_settime(timerid, 0, &its, NULL) == -1) {
             ERROR("set posix timer failed");
+            fprintf(stderr, "%s\n", strerror(errno));
             exit(EXIT_FAILURE);
             // TODO handle error
         }
@@ -190,9 +191,6 @@ LOOP:
     /* remove ticker */
     this->removeTicker();
 
-    Time::TimePoint start1 = ticker->getStart();
-    Time::TimePoint end1 = start1 + ticker->getExpire();
-
     /* reset ticker */
     if (ticker->isPeriodic()) {
         ticker->setStart(this->m_clock->now() + ticker->getPeriod());
@@ -201,12 +199,8 @@ LOOP:
 
     /* check next ticker */
     ticker = this->getTicker();
-    if (ticker) {
-        Time::TimePoint start2 = ticker->getStart();
-        if (start2 >= start1 && start2 < end1) {
-            goto LOOP;
-        }
-    }
+    if (ticker)
+        goto LOOP;
 }
 
 void PQTimer::stop() {

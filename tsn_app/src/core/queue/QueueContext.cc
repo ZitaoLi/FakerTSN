@@ -26,7 +26,7 @@ std::vector<std::shared_ptr<IQueue>> QueueContext::getQueues() {
 
 /* enqueue */
 void QueueContext::enqueue(IFrameBody* frame) {
-    INFO("Enqueue");
+    INFO("[" + std::to_string(this->m_portIndex) + "] Enqueue");
 
     if (frame->getType() == IEEE_802_1Q_TSN_FRAME || frame->getType() == IEEE_802_1Q_TSN_FRAME_E) {  // TSN frame or enhanced TSN frame
         TSNFrameBody* tsnFrame = dynamic_cast<TSNFrameBody*>(frame);
@@ -39,8 +39,9 @@ void QueueContext::enqueue(IFrameBody* frame) {
 
 /* dequeue */
 IFrameBody* QueueContext::dequeue() {
-    INFO("Dequeue");
-    this->m_transmissionSelection.dequeue(this);
+    INFO("[" + std::to_string(this->m_portIndex) + "] Dequeue");
+
+    return this->m_transmissionSelection.dequeue(this);
 }
 
 }  // namespace faker_tsn

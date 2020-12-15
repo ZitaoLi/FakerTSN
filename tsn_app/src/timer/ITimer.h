@@ -398,7 +398,9 @@ class Ticker {
         ss << "StartTime<" << this->start.toString() << "> ";
         ss << "ExpireTime<" << this->expire.toString() << "> ";
         ss << "PeriodTime<" << this->period.toString() << "> ";
-        ss << "CreateTime<" << this->createTime.toString() << ">";
+        ss << "CreateTime<" << this->createTime.toString() << "> ";
+        ss << "LaunchTime<" << this->launchTime.toString() << "> ";
+        ss << "StartOffset<" << this->startOffset.toString() << "> ";
         return ss.str();
     }
 };
