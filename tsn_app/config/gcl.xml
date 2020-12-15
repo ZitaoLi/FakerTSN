@@ -15,7 +15,7 @@
 			<entry>
 				<!-- us -->
 				<length>100000</length>
-				<bitvector>00000001</bitvector>
+				<bitvector>11111110</bitvector>
 				<uniqueID>2</uniqueID>
 				<phase>0</phase>
 			</entry>

@@ -52,7 +52,8 @@ void GateControlList::loadScheduleXML(std::string filename) {
     this->m_period = hyperPeriod;
     /* get gate control list items */
     XMLElement* device = schedule->FirstChildElement("switch");
-    while (!strcmp(device->Attribute("name"), ConfigSetting::getInstance().get<const char*>("deviceName"))) {
+    INFO("load " + std::string(ConfigSetting::getInstance().get<const char*>("deviceName")));
+    while (strcmp(device->Attribute("name"), ConfigSetting::getInstance().get<const char*>("deviceName")) != 0) {
         device = device->NextSiblingElement();
     }
     XMLElement* port = device->FirstChildElement("port");
