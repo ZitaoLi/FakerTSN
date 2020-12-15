@@ -16,7 +16,7 @@ class TransmissionSelection {
    public:
     ~TransmissionSelection() = default;
 
-    IFrameBody* dequeue(QueueContext& queueContext);
+    IFrameBody* dequeue(QueueContext* queueContext);
 };
 
 }  // namespace faker_tsn

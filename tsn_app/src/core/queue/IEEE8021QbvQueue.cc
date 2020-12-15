@@ -5,14 +5,14 @@
 namespace faker_tsn
 {
 
-IEEE8021QbvQueue::IEEE8021QbvQueue(unsigned short portIndex, uint8_t pcp) {
+IEEE8021QbvQueue::IEEE8021QbvQueue(unsigned short portIndex, uint8_t pcp) : m_portIndex(portIndex), m_pcp(pcp) {
     ConfigSetting& cs = ConfigSetting::getInstance();
     this->m_deviceName = cs.get<std::string>("deviceName");
-    INFO("Construct " + this->m_deviceName + ".port" + std::to_string(portIndex) + ".queue" + std::to_string(pcp));
+    INFO("Construct " + this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp));
 
     /* initialize innner buffer */
     int capacity = cs.get<int>("switch.queue.capacity");
-    this->m_innerBuffer = std::make_shared<InnerBuffer>(portIndex, pcp, capacity);
+    this->m_innerBuffer = std::make_shared<InnerBuffer>(this->m_portIndex, this->m_pcp, capacity);
 
     /* initialize transimssion selection algorithm */
     std::string transmissionSelectionAlgorithmClass = cs.get<std::string>("switch.queue.transmissionSelectionAlgorithm");
@@ -33,7 +33,7 @@ void IEEE8021QbvQueue::enqueue(IFrameBody* frameBody) {
 
 /* get frame body from queue */
 IFrameBody* IEEE8021QbvQueue::dequeue() {
-    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " dequeue");
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " dequeue, gate stats = " + std::to_string(this->m_transmissionGate->isOpen()));
 
     if (this->m_transmissionGate->isOpen())
         return this->m_transmissionGate->dequeue();

@@ -24,6 +24,10 @@ class TransmissionGate : public std::enable_shared_from_this<TransmissionGate> {
 
     ~TransmissionGate() = default;
 
+    inline uint8_t getPCP() {
+        return this->m_pcp;
+    }
+
     inline void setOpen(bool state) {
         this->m_isOpen = state;
     }

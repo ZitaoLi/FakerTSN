@@ -8,28 +8,28 @@
 			<entry>
 				<!-- us -->
 				<length>100000</length>
-				<bitvector>00000001</bitvector>
+				<bitvector>10000000</bitvector>
 				<uniqueID>1</uniqueID>
 				<phase>0</phase>
 			</entry>
 			<entry>
 				<!-- us -->
 				<length>100000</length>
-				<bitvector>11111110</bitvector>
+				<bitvector>01111111</bitvector>
 				<uniqueID>2</uniqueID>
 				<phase>0</phase>
 			</entry>
 			<entry>
 				<!-- us -->
 				<length>100000</length>
-				<bitvector>00000001</bitvector>
+				<bitvector>10000000</bitvector>
 				<uniqueID>3</uniqueID>
 				<phase>0</phase>
 			</entry>
 			<entry>
 				<!-- us -->
 				<length>100000</length>
-				<bitvector>11111110</bitvector>
+				<bitvector>01111111</bitvector>
 				<uniqueID>0</uniqueID>
 				<phase>0</phase>
 			</entry>

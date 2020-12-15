@@ -1,4 +1,5 @@
 #include "QueueContext.h"
+#include "IEEE8021QbvQueue.h"
 
 namespace faker_tsn {
 
@@ -11,7 +12,8 @@ QueueContext::QueueContext(unsigned short portIndex) : m_portIndex(portIndex) {
     std::string queueClass = cs.get<std::string>("switch.queue.class");
     INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queues.class = " + queueClass);
     for (int pcp = 0; pcp < queueNum; pcp++) {
-        std::shared_ptr<IQueue> queue(dynamic_cast<IQueue*>(REFLECTOR::CreateByTypeName("faker_tsn::" + queueClass, (unsigned short)this->m_portIndex, static_cast<uint8_t>(pcp))));
+        // std::shared_ptr<IQueue> queue(dynamic_cast<IQueue*>(REFLECTOR::CreateByTypeName("faker_tsn::" + queueClass, (unsigned short)this->m_portIndex, static_cast<uint8_t>(pcp))));
+        std::shared_ptr<IQueue> queue(dynamic_cast<IQueue*>(REFLECTOR::CreateByTypeName("faker_tsn::" + queueClass, (unsigned short)this->m_portIndex, (uint8_t)pcp)));
         this->m_queues.push_back(std::move(queue));
     }
 }
@@ -25,8 +27,6 @@ std::vector<std::shared_ptr<IQueue>> QueueContext::getQueues() {
 /* enqueue */
 void QueueContext::enqueue(IFrameBody* frame) {
     INFO("Enqueue");
-    // // TODO
-    // this->m_tempQueue.push_back(frame);
 
     if (frame->getType() == IEEE_802_1Q_TSN_FRAME || frame->getType() == IEEE_802_1Q_TSN_FRAME_E) {  // TSN frame or enhanced TSN frame
         TSNFrameBody* tsnFrame = dynamic_cast<TSNFrameBody*>(frame);
@@ -40,16 +40,7 @@ void QueueContext::enqueue(IFrameBody* frame) {
 /* dequeue */
 IFrameBody* QueueContext::dequeue() {
     INFO("Dequeue");
-    // TODO
-    // if (this->m_tempQueue.size() == 0) {
-    //     INFO("Empty queue");
-    //     return nullptr;
-    // }
-    // IFrameBody* frame = this->m_tempQueue.front();
-    // this->m_tempQueue.pop_front();
-    // return frame;
-
-    this->m_transmissionSelection.dequeue(*this);
+    this->m_transmissionSelection.dequeue(this);
 }
 
 }  // namespace faker_tsn

@@ -80,7 +80,7 @@ GateControlListItem GateControlList::getCurrentItem() {
 
 /* append gate */
 void GateControlList::appendGate(std::shared_ptr<TransmissionGate> gate) {
-    INFO("[" + std::to_string(m_portId) + "] append a gate");
+    INFO("[" + std::to_string(m_portId) + "] append a gate of queue [" + std::to_string(gate->getPCP()) + "]");
     this->m_gates.push_back(std::move(gate));
     this->m_gateSize += 1;
 }
@@ -90,10 +90,12 @@ void GateControlList::updateGates() {
     INFO("[" + std::to_string(this->m_portId) + "] update gates");
     INFO("[" + std::to_string(this->m_portId) + "] -> " + this->m_gcl[this->m_cursor].toString());
     auto item = this->m_gcl[this->m_cursor];
-    for (int i = 0; i < this->m_gateSize; i++) {
+    for (int i = this->m_gateSize - 1; i >= 0 ; i--) {
         if (item.m_gateStates.test(i)) {
+            INFO("[" + std::to_string(this->m_portId) + "] gate [" + std::to_string(this->m_gates[i]->getPCP()) + "] -> 1");
             this->m_gates[i]->onUpdate(i, true); // open gate
         } else {
+            INFO("[" + std::to_string(this->m_portId) + "] gate [" + std::to_string(this->m_gates[i]->getPCP()) + "] -> 0");
             this->m_gates[i]->onUpdate(i, false); // close gate
         }
     }
