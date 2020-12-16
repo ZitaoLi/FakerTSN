@@ -29,6 +29,10 @@ void PortManager::findAllDeviceName()
     free(alldevsp);
 }
 
+void PortManager::appendDeviceName(const char* deviceName) {
+    this->m_deviceNames.push_back(deviceName);
+}
+
 void PortManager::createPortFromDeviceNameList()
 {
     for (auto it = this->m_deviceNames.begin(); it != this->m_deviceNames.end(); it++) {

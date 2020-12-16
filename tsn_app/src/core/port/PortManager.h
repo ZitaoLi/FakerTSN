@@ -39,6 +39,9 @@ public:
     /* find all device name */
     void findAllDeviceName();
 
+    /* add device name */
+    void appendDeviceName(const char*);
+
     /* create port from device name list */
     void createPortFromDeviceNameList();
 
