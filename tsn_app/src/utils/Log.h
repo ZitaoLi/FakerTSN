@@ -1,12 +1,14 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-#include "DebugLogger.h"
+#include "Logger.h"
 
 #define INFO(x) Log::info(x, __FILE__, __LINE__)
 #define DEBUG(x) Log::debug(x, __FILE__, __LINE__)
 #define WARN(x) Log::warn(x, __FILE__, __LINE__)
 #define ERROR(x) Log::error(x, __FILE__, __LINE__)
+
+#define LOG_LEVEL uint8_t
 
 namespace faker_tsn
 {
@@ -16,22 +18,27 @@ class Log
 private:
     Log(/* args */);
 public:
-    static const uint8_t DEBUG_LEVEL;
-    static const uint8_t INFO_LEVEL; 
-    static const uint8_t WARN_LEVEL;   
-    static const uint8_t ERROR_LEVEL;
+    static Logger* m_logger;
+    static uint8_t DEBUG_LEVEL;
+    static uint8_t INFO_LEVEL; 
+    static uint8_t WARN_LEVEL;   
+    static uint8_t ERROR_LEVEL;
     static uint8_t level;
+    static std::string path;
+    static std::string mode; /* std, file */
 
     Log(const Log&) = delete;
     Log(Log&&) = delete;
     Log& operator=(const Log&) = delete;
     Log& operator=(Log&&) = delete;
 
-    static Logger& getLogger();
+    static Logger* getLogger();
 
     static void setLoggerLevel(const uint8_t&);
 
     static void setLoggerStreamFormat(); // TODO
+
+    static void setLogger(uint8_t, std::string, std::string);
 
     static void info(const char*, const char*, int);
 

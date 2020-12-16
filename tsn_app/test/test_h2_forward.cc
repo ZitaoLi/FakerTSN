@@ -5,7 +5,13 @@
 
 using namespace faker_tsn;
 
-static void Sender() {
+static void Switch() {
+    // set logger
+    LOG_LEVEL logLevel = ConfigSetting::getInstance().get<uint8_t>("log.level");
+    std::string logPath = ConfigSetting::getInstance().get<std::string>("log.path");
+    std::string logMode = ConfigSetting::getInstance().get<std::string>("log.mode");
+    Log::setLogger(Log::INFO_LEVEL, logPath, logMode);
+
     // crate port 1
     const char* name1 = "s2-eth0";
     // const char* name1 = "eth1";
@@ -45,5 +51,5 @@ static void Sender() {
 }
 
 TEST(TEST_H2_FORWARD, FORWARD1) {
-    Sender();
+    Switch();
 }

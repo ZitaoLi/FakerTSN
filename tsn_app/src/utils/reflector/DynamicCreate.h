@@ -9,6 +9,8 @@
 #include <typeinfo>
 #include <unordered_map>
 
+#include "../Log.h"
+
 namespace faker_tsn {
 
 /* REFLECT_OBJECT */
