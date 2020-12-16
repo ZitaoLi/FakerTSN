@@ -12,7 +12,7 @@ const uint8_t Logger::ERROR = 4;
 Logger::Logger()
 {
     printf("%p \n", this);
-    this->m_level = Logger::DEBUG;
+    this->m_level = Logger::INFO;
     this->m_path = "./log/log";
     this->m_mode = "std";
     this->os.open(this->m_path, std::ios::out | std::ios::trunc);
