@@ -1,5 +1,7 @@
 #include "Log.h"
 
+#include "DebugLogger.h"
+
 namespace faker_tsn
 {
 
@@ -10,7 +12,7 @@ uint8_t Log::ERROR_LEVEL = Logger::ERROR;
 uint8_t Log::level = Logger::INFO;
 std::string Log::path = "./log/log";
 std::string Log::mode = "std";
-Logger* Log::m_logger = new Logger();
+Logger* Log::m_logger = new DebugLogger();
 
 Logger* Log::getLogger()
 {
