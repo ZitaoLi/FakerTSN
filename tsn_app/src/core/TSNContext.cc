@@ -13,8 +13,6 @@ TSNContext::~TSNContext() {
 
 void TSNContext::setState(const std::shared_ptr<ITSNContextState>& state) {
     this->m_state = state;
-    /* new port manager */
-    this->m_portManager = std::make_shared<PortManager>();
 }
 
 std::shared_ptr<ITSNContextState>& TSNContext::getState() {

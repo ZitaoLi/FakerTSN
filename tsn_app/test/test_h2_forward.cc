@@ -39,24 +39,29 @@ static void Switch() {
     // portManager->appendPort(port2);
     // portManager->appendPort(port3);
 
-    std::shared_ptr<PortManager> portManager = TSNContext::getInstance().getPortManager();
-    const char* name1 = "s2-eth0";
-    const char* name2 = "s2-eth1";
-    const char* name3 = "s2-eth2";
-    portManager->appendDeviceName(name1);
-    portManager->appendDeviceName(name2);
-    portManager->appendDeviceName(name3);
-    portManager->createPortFromDeviceNameList();
+    // std::shared_ptr<PortManager> portManager = TSNContext::getInstance().getPortManager();
+    // const char* name1 = "s2-eth0";
+    // const char* name2 = "s2-eth1";
+    // const char* name3 = "s2-eth2";
+    // portManager->appendDeviceName(name1);
+    // portManager->appendDeviceName(name2);
+    // portManager->appendDeviceName(name3);
+    // portManager->createPortFromDeviceNameList();
 
-    // load mac table
-    MacTable::loadRouteXML("./config/routes.xml");
-    MulticastMacTable::loadRouteXML("./config/routes.xml");
+    // // load mac table
+    // MacTable::loadRouteXML("./config/routes.xml");
+    // MulticastMacTable::loadRouteXML("./config/routes.xml");
 
-    // start timer
-    TimeContext::getInstance().getTimer()->start();
+    // // start timer
+    // TimeContext::getInstance().getTimer()->start();
 
-    // enable reactor
-    Reactor::getInstance().handle_events();
+    // // enable reactor
+    // Reactor::getInstance().handle_events();
+
+
+    TSNContext& context = TSNContext::getInstance();
+    std::shared_ptr<InitTSNContextState> initState = std::make_shared<InitTSNContextState>();
+    initState->doAction(context);
 }
 
 TEST(TEST_H2_FORWARD, FORWARD1) {

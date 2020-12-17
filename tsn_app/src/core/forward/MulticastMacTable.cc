@@ -6,7 +6,7 @@ std::unordered_map<mac_token, struct MulticastMacTable::ForwardItem>
     MulticastMacTable::items; /* <mac addr, forward item> pair*/
 
 /* print multicast mac table */
-std::string toString() {
+std::string MulticastMacTable::toString() {
     std::stringstream ss;
     auto it = MulticastMacTable::items.begin();
     for (; it != MulticastMacTable::items.end(); it++) {
