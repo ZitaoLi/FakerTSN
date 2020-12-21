@@ -1,5 +1,8 @@
 #include "PortManager.h"
 
+#include "../port/ConsolePort.h"
+#include "../../utils/config/ConfigSetting.h"
+
 namespace faker_tsn
 {
 
@@ -7,6 +10,28 @@ const char *PortManager::s_portFilterList[] = {
     "lo", "any", "nflog", "nfqueue", "bluetooth0", "docker0", "usbmon1", "usbmon2"
 };
 const int PortManager::s_portFilterLen = 8;
+
+PortManager::PortManager() {
+    /* create console port */
+    INFO("create console port");
+    this->m_console_port = std::make_shared<ConsolePort>();
+    auto creationState = std::make_shared<CreationPortState>();
+    creationState->doAction(this->m_console_port);
+
+    /* initilize ports */
+    INFO("create data ports");
+    const char* infsc = ConfigSetting::getInstance().get<const char*>("switch.port.infs");
+    std::vector<const char*> interfaces;
+    char* _t = strtok(const_cast<char*>(infsc), " ");
+    while (_t) {
+        INFO("add interface [" + std::string(_t) + "]");
+        interfaces.push_back(_t);
+        _t = strtok(NULL, " ");
+    }
+    for (auto interface: interfaces)
+        this->appendDeviceName(interface);
+    this->createPortFromDeviceNameList();
+}
 
 void PortManager::appendPort(std::shared_ptr<IPort>& port) {
     this->m_ports.push_back(port);
@@ -64,6 +89,10 @@ std::shared_ptr<IPort> PortManager::getPort(uint8_t index)
 {
     return this->m_ports.at(index);
 };
+
+std::vector<std::shared_ptr<IPort>> PortManager::getPorts() {
+    return this->m_ports;
+}
 
 // this function may not work properly in virtual environment, e.g., VMWare
 int PortManager::findMacAddress(std::shared_ptr<IPort> port, const char *deviceName, char hwaddr[])

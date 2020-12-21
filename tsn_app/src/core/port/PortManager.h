@@ -19,11 +19,13 @@ class PortManager
 private:
     std::vector<const char*> m_deviceNames;
     std::vector<std::shared_ptr<IPort>> m_ports;
+    std::shared_ptr<IPort> m_console_port;
+    
 public:
     static const char *s_portFilterList[];
     static const int s_portFilterLen;
 
-    PortManager() = default;
+    PortManager();
 
     ~PortManager() = default;
 
@@ -32,6 +34,9 @@ public:
 
     /* get port using index */
     std::shared_ptr<IPort> getPort(uint8_t index);
+
+    /* get ports */
+    std::vector<std::shared_ptr<IPort>> getPorts();
 
     /* add port */
     void appendPort(std::shared_ptr<IPort>& port);

@@ -19,29 +19,18 @@ void InitTSNContextState::doAction(TSNContext& context) {
     context.setState(prt);
     INFO("START STATE");
 
-    /* initilize ports */
-    const char* infsc = ConfigSetting::getInstance().get<const char*>("switch.port.infs");
-    std::vector<const char*> interfaces;
-    char* _t = strtok(const_cast<char*>(infsc), " ");
-    while (_t) {
-        INFO("add interface [" + std::string(_t) + "]");
-        interfaces.push_back(_t);
-        _t = strtok(NULL, " ");
-    }
-    auto manager = context.getPortManager();
-    for (auto interface: interfaces)
-        manager->appendDeviceName(interface);
-    manager->createPortFromDeviceNameList();
+    /* create port manager */
+    std::shared_ptr<PortManager> manager = std::make_shared<PortManager>();
+    context.setPortManager(manager);
 
     /* initialize mac table */
     MacTable::loadRouteXML("./config/routes.xml");
-    INFO("----- MAC TABLE (unicast) -----" + MacTable::toString());
+    INFO("----- MAC TABLE (unicast) -----\n" + MacTable::toString());
     MulticastMacTable::loadRouteXML("./config/routes.xml");
-    INFO("----- MAC TABLE (multicast) -----" + MulticastMacTable::toString());
+    INFO("----- MAC TABLE (multicast) -----\n" + MulticastMacTable::toString());
 
-    /* change state to run */
-    std::shared_ptr<ITSNContextState> runState = std::make_shared<RunTSNContextState>();
-    runState->doAction(context);
+    /* enable reactor */
+    Reactor::getInstance().handle_events(); 
 }
 
 }  // namespace faker_tsn

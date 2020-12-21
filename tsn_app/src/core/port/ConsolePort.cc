@@ -3,6 +3,7 @@
 #include <fcntl.h>
 
 #include "CreationPortState.h"
+#include "../../networking/ControlEventHandler.h"
 
 namespace faker_tsn {
 
@@ -54,12 +55,14 @@ const char* ConsolePort::getDeviceName() const {
 }
 
 void ConsolePort::createSocket() {
+    // TODO
+    this->m_sockfd = STDIN_FILENO; // standard input
 }
 
 void ConsolePort::registerEventHandler() {
-    std::shared_ptr<IEventHandler> stdinEventHandler = std::make_shared<StdinEventHandler>(this->m_sockfd);
+    std::shared_ptr<IEventHandler> handler = std::make_shared<ControlEventHandler>(this->m_sockfd);
     /* register stdin event handler */
-    Reactor::getInstance().register_handler(stdinEventHandler, EVENT_TYPE::READ);
+    Reactor::getInstance().register_handler(handler, EVENT_TYPE::READ);
 }
 
 void ConsolePort::sendTest() {

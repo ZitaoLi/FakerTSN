@@ -3,8 +3,6 @@
 namespace faker_tsn {
 
 TSNContext::TSNContext(/* args */) {
-    /* create PortManager */
-    this->m_portManager = std::make_shared<PortManager>();
     // TODO create Timer
 }
 

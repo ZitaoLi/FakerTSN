@@ -31,6 +31,13 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort> {
     std::shared_ptr<LinkLayerInterface> m_interface; /* link layer interface */
     std::shared_ptr<IPortState> state;               /* port state */
     int m_eventTypes = 0;                            /* event type */
+
+   public:
+    /* get gate control list */
+    std::shared_ptr<GateControlList> getGCL() {
+        return this->m_gcl;
+    }
+
    public:
     /* no. of port */
     static uint8_t s_portNum;

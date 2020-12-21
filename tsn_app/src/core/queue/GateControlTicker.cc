@@ -41,7 +41,7 @@ void GateControlTicker::operator()() {
     Time::TimeInterval precision = Time::converIntegerToTimeInterval(TimeContext::getInstance().getTimer()->getPrecision(), "ns");
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] precision\t " + precision.toString());
     if (deviation >= precision) {
-        ERROR("[" + std::to_string(this->m_gcl->getPortId()) + "] out of precision");
+        ERROR("[" + std::to_string(this->m_gcl->getPortId()) + "] out of precision: " + deviation.toString());
         // TODO record
     }
     // next ideal interval

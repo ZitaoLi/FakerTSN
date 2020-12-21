@@ -24,19 +24,6 @@ GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_leng
     INFO("[" + std::to_string(this->m_portId) + "] load gcl.xml");
     std::string filename = "./config/gcl.xml";
     this->loadScheduleXML(filename);
-
-    /* register ticker to timer */
-    INFO("[" + std::to_string(this->m_portId) + "] register ticker to timer");
-    if (this->m_gcl.size() != 0) {
-        Time::TimePoint startTime(0, 0);
-        GateControlListItem item = this->m_gcl[this->m_cursor];
-        INFO("[" + std::to_string(this->m_portId) + "] " + item.toString());
-        Ticker* ticker = new GateControlTicker(
-            startTime,
-            item.m_timeInterval,
-            this);
-        TimeContext::getInstance().getTimer()->addTicker(ticker);
-    }
 }
 
 void GateControlList::loadScheduleXML(std::string filename) {
@@ -71,6 +58,22 @@ void GateControlList::loadScheduleXML(std::string filename) {
         );
         entry = entry->NextSiblingElement();
         this->m_length++;
+    }
+}
+
+/* register GCL from schedules */
+void GateControlList::registerGCLfromSchedules() {
+    /* register ticker to timer */
+    INFO("[" + std::to_string(this->m_portId) + "] register ticker to timer");
+    if (this->m_gcl.size() != 0) {
+        Time::TimePoint startTime(0, 0);
+        GateControlListItem item = this->m_gcl[this->m_cursor];
+        INFO("[" + std::to_string(this->m_portId) + "] " + item.toString());
+        Ticker* ticker = new GateControlTicker(
+            startTime,
+            item.m_timeInterval,
+            this);
+        TimeContext::getInstance().getTimer()->addTicker(ticker);
     }
 }
 

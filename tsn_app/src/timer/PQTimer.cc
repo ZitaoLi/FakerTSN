@@ -22,7 +22,7 @@ void onAlarm(int sig, siginfo_t* si, void* ucontext) {
     INFO("now <" + clock->now().toString() + ">");
 
     // timer_t* tidp = si->si_value.sival_ptr;
-    printf("    sival_ptr = %p\n", si->si_value.sival_ptr);
+    // printf("    sival_ptr = %p\n", si->si_value.sival_ptr);
     // printf("    sival_ptr = 0x%lx\n", (long long)tidp);
 
     // int _or = timer_getoverrun(&tidp);
@@ -125,26 +125,31 @@ void PQTimer::setTimer(Ticker* ticker) {
         // TODO handle error
         exit(EXIT_FAILURE);
     }
-    printf("    sival_ptr = %p\n", evp.sigev_value.sival_ptr);
-    printf("    timer ID Address is %p\n", &timerid);
-    printf("    timer ID is 0x%lx\n", (size_t)timerid);
 
     // /* associate timer with ticker */
     // this->m_timers.insert({(size_t)timerid, ticker});
 
     /* set timer */
+    struct itimerspec its;
+    memset(&its, 0, sizeof(its));
     if (ticker->getStart() != 0) {
-        // TODO
-        ERROR("absolute start time is not supported");
-        exit(EXIT_FAILURE);
+        /* start time is absolute */
+        Time::TimePoint start = ticker->getStart();
+        its.it_value.tv_sec = start.sec;
+        its.it_value.tv_nsec = start.nsec;
+        if (timer_settime(timerid, TIMER_ABSTIME, &its, NULL) == -1) {
+            ERROR("set posix timer failed");
+            fprintf(stderr, "%s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+            // TODO handle error
+        }
     } else {
+        /* start time is offset */
         Time::TimePoint now = Reflector::getNewInstance<IClock>("RealTimeClock")->now();
         ticker->setLaunchTime(now);
         Time::TimeInterval tp = ticker->getExpire();
         INFO("Set Sec = " + std::to_string(tp.sec) + ", Nsec = " + std::to_string(tp.nsec));
 
-        struct itimerspec its;
-        memset(&its, 0, sizeof(its));
         its.it_value.tv_sec = tp.sec;
         its.it_value.tv_nsec = tp.nsec;
         if (timer_settime(timerid, 0, &its, NULL) == -1) {
@@ -224,6 +229,7 @@ Ticker* PQTimer::getTickerBy(long long id) {
 }
 
 void PQTimer::addTicker(Ticker* ticker) {
+    INFO("add ticker -> " + ticker->toString());
     this->m_tickers.push(ticker);
 }
 

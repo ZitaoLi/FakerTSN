@@ -33,6 +33,10 @@ class TSNContext {
         return this->m_deviceName;
     }
 
+    void setPortManager(std::shared_ptr<PortManager>& manager) {
+        this->m_portManager = manager;
+    }
+
     /* return port manager */
     std::shared_ptr<PortManager> getPortManager() {
         return this->m_portManager;

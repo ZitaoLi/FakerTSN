@@ -10,7 +10,7 @@ namespace faker_tsn {
 
 class ConsolePort : public IPort, public std::enable_shared_from_this<ConsolePort> {
    private:
-    int m_sockfd = STDIN_FILENO; /* stdin */
+    int m_sockfd;
     std::shared_ptr<IPortState> state;
     int m_eventTypes = 0; /* event type */
    public:

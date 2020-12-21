@@ -56,6 +56,8 @@ class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControl
 
     virtual ~GateControlList() = default;
 
+    void registerGCLfromSchedules();
+
     /* get port index */
     inline unsigned int getPortId() {
         return this->m_portId;

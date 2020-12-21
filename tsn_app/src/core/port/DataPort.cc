@@ -130,7 +130,7 @@ void DataPort::createSocket() {
             auto gate = std::dynamic_pointer_cast<IEEE8021QbvQueue>(queue)->getTransmissionGate();
             gate->registerGCL(this->m_gcl);
         }
-        this->m_gcl->updateGates();
+        this->m_gcl->updateGates(); // first update
     }
 
     /* mac address */

@@ -15,7 +15,7 @@ void CreationPortState::doAction(std::shared_ptr<IPort> port) {
     port->setState(ptr);
     INFO("Port[" + std::string(port->getDeviceName()) + "] CREATION STATE");
 
-    /* socket */
+    /* create socket */
     try {
         port->createSocket();
     } catch (const std::exception& e) {
