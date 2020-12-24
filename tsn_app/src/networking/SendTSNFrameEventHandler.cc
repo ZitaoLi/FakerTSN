@@ -5,8 +5,7 @@ namespace faker_tsn {
 SendTSNFrameEventHandler::SendTSNFrameEventHandler(
     HANDLE handle,
     struct sockaddr_ll& sockAddrII,
-    std::shared_ptr<QueueContext> queueContext) : m_handle(handle),
-                                                  m_queueContext(queueContext) {
+    IPort* port) : m_handle(handle), m_port(port) {
     memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
 }
 
@@ -23,7 +22,7 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     INFO("SendTSNFrameEventHandler on call");
 
     /* try to get frame from queue */
-    TSNFrameBody* frameBody = (TSNFrameBody*)this->m_queueContext->dequeue();
+    TSNFrameBody* frameBody = (TSNFrameBody*)this->m_port->output();
     if (frameBody == nullptr) {
         // disable EPOLLOUT event
         Reactor::getInstance().getDemultoplexer().updateHandle(this->m_handle, 0x00);

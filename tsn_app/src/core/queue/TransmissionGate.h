@@ -17,6 +17,8 @@ class TransmissionGate : public std::enable_shared_from_this<TransmissionGate> {
     std::shared_ptr<TransmissionSelectionAlgorithm> m_algorithm;
 
    public:
+    TransmissionGate() : m_isOpen(true), m_algorithm(nullptr), m_pcp(0) {}
+    
     TransmissionGate(std::shared_ptr<TransmissionSelectionAlgorithm> algorithm) : m_isOpen(true) {
         this->m_algorithm = algorithm;
         this->m_pcp = algorithm->getPCP();
@@ -37,7 +39,7 @@ class TransmissionGate : public std::enable_shared_from_this<TransmissionGate> {
     }
 
     /* dequeue head frame */
-    IFrameBody* dequeue();
+    virtual IFrameBody* dequeue();
 
     /* Observer pattern */
 

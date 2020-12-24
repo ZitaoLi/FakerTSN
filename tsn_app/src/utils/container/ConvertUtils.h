@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <climits>
+#include <cstring>
 
 class ConvertUtils {
    public:
@@ -31,6 +33,21 @@ class ConvertUtils {
         for (int i = 0, j = 0; i < 6; i++, j += 3) {
             int n = std::stoi(macString.substr(j, 2), 0, 16);
             memcpy(mac + i, (unsigned char*)&n, 1);
+        }
+    }
+
+    // TODO overflow problem
+    static unsigned long long converSizeToByte(long long size, std::string unit) {
+        if (unit == "B") {
+            return size;
+        } else if (unit == "K") {
+            return size * 1024;
+        } else if (unit == "M") {
+            return size * 1024 * 1024;
+        } else if (unit == "G") {
+            return size * 1024 * 1024 * 1024;
+        } else {
+            return 0;
         }
     }
 };

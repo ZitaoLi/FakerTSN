@@ -69,6 +69,8 @@ class ConfigSetting {
         return configSetting;
     }
 
+    void load(std::string);
+
     /* search for key and get value, call as get<T>(key) */
     template <class T>
     T get(const std::string& key) const;

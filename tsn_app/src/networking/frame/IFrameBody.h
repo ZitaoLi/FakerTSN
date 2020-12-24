@@ -2,8 +2,11 @@
 #define _I_FRAME_BODY_H
 
 #include <linux/if_packet.h>
+#include <string>
 
 #include "RelayEntity.h"
+
+#define MAX_FRAME_SIZE 1500
 
 namespace faker_tsn {
 
@@ -15,6 +18,10 @@ class IFrameBody {
     virtual ~IFrameBody() = default;
 
     virtual unsigned int getBytes() = 0;
+
+    virtual std::string toString() {
+        return "IFrameBody";
+    }
 
     void setType(RELAY_ENTITY type) {
         this->m_type = type;

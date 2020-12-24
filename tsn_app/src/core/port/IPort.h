@@ -83,6 +83,11 @@ class IPort {
     /* input something into port */
     virtual void input(void*, size_t, RELAY_ENTITY type) = 0;
 
+    /* output something */
+    virtual void* output() = 0;
+
+    virtual void setTimer() = 0;
+
     // virtual int enableCapture() = 0;
 
     virtual std::string toString() = 0;

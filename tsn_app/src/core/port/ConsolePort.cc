@@ -71,4 +71,8 @@ void ConsolePort::sendTest() {
 /* input something into port */
 void ConsolePort::input(void* data, size_t len, RELAY_ENTITY type) {}
 
+void* ConsolePort::output() {
+    return nullptr;
+}
+
 }  // namespace faker_tsn

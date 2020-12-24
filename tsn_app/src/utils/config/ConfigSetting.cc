@@ -1,12 +1,16 @@
 #include "ConfigSetting.h"
 
 ConfigSetting::ConfigSetting() : m_delimiter(std::string(1, '=')), m_commet(std::string(1, '#')), m_filename("config/config.ini") {
-    std::ifstream in(this->m_filename.c_str());
-    if (!in) throw FileNotFoundException(this->m_filename.c_str());
-    in >> (*this);
 }
 
 ConfigSetting::~ConfigSetting() {
+}
+
+void ConfigSetting::load(std::string filename) {
+    this->m_filename = filename;
+    std::ifstream in(this->m_filename.c_str());
+    if (!in) throw FileNotFoundException(this->m_filename.c_str());
+    in >> (*this);
 }
 
 void ConfigSetting::trim(std::string& inout_s) {

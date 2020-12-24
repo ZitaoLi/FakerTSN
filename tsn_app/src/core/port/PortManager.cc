@@ -71,7 +71,9 @@ void PortManager::createPortFromDeviceNameList()
         }
         if (flag) continue;
         // create port
-        std::shared_ptr<IPort> port = std::make_shared<DataPort>(*it);
+        std::string portClass = ConfigSetting::getInstance().get<std::string>("switch.port.class");
+        std::shared_ptr<IPort> port(dynamic_cast<IPort*>(REFLECTOR::CreateByTypeName("faker_tsn::" + portClass, (const char*)*it)));
+        // std::shared_ptr<IPort> port = std::make_shared<DataPort>(*it);
         INFO("create port name:" + std::string(port->getDeviceName()) + " id:" + std::to_string(port->getDeviceID()));
         auto creationState = std::make_shared<CreationPortState>();
         creationState->doAction(port);

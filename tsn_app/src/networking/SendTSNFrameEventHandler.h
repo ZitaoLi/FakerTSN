@@ -20,10 +20,10 @@ class SendTSNFrameEventHandler : public IEventHandler {
    private:
     HANDLE m_handle;
     struct sockaddr_ll m_sockAddrII;
-    std::shared_ptr<QueueContext> m_queueContext;
+    IPort* m_port;
 
    public:
-    SendTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, std::shared_ptr<QueueContext> queueContext);
+    SendTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port);
 
     virtual ~SendTSNFrameEventHandler() override;
 

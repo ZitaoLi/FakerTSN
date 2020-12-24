@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <filteringDatabases>
+  <filteringDatabase id="host1">
+    <static>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-01"/>
+        <multicastAddress ports="0 2" macAddress="01-00-00-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
   <filteringDatabase id="switch2">
     <static>
       <forward>

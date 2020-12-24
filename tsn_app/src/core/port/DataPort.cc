@@ -155,11 +155,16 @@ void DataPort::registerEventHandler() {
 
     /* register for inbound socket */
     std::shared_ptr<IEventHandler> recvTSNFrameEventHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_inSockfd, *addr_ll);
+    // std::shared_ptr<IEventHandler> recvTSNFrameEventHandler(dynamic_cast<IEventHandler*>(REFLECTOR::CreateByTypeName(
+    //     "faker_tsn::RecvTSNFrameEventHandler", 
+    //     (int)this->m_inSockfd, 
+    //     (struct sockaddr_ll)(*addr_ll)))
+    // );
     Reactor::getInstance().register_handler(recvTSNFrameEventHandler, EVENT_TYPE::READ);
     INFO("Register RecvTSNFrameEventHandler in Reactor");
 
     /* register for outbound socket */
-    std::shared_ptr<IEventHandler> sendTSNFrameEventHandler = std::make_shared<SendTSNFrameEventHandler>(this->m_outSockfd, *addr_ll, this->m_queueContext);
+    std::shared_ptr<IEventHandler> sendTSNFrameEventHandler = std::make_shared<SendTSNFrameEventHandler>(this->m_outSockfd, *addr_ll, this);
     Reactor::getInstance().register_handler(sendTSNFrameEventHandler, EVENT_TYPE::WRITE);
     INFO("Register SendTSNFrameEventHandler in Reactor");
 }
@@ -231,6 +236,16 @@ void DataPort::input(void* data, size_t len, RELAY_ENTITY type) {
         frame->setType(type);
         this->m_queueContext->enqueue(reinterpret_cast<EnhancementTSNFrameBody*>(data));
     }
+}
+
+void* DataPort::output() {
+    return (void*)this->m_queueContext->dequeue();
+}
+
+void DataPort::setTimer() {
+    /* register gate control list item into timer */
+    INFO("register GCL items");
+    this->m_gcl->registerGCLfromSchedules();
 }
 
 std::shared_ptr<QueueContext> DataPort::getQueueContext() {

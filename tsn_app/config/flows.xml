@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<schedule sizeUnit="B" timeUnit="us">
+	<!-- us -->
+	<cycle>4000000</cycle>	<!-- 4000 ms -->
+
+	<host name="host1">
+		<entry>
+			<!-- us -->
+			<start>0</start>
+			<duration>1000000</duration>
+			<period>2000000</period>
+			<pcp>7</pcp>
+			<dest>01:00:00:00:00:04</dest>
+			<group>01:00:00:00:00:04</group>
+			<!-- byte -->
+			<!-- maximum = 1490B -->
+			<size>8000</size>
+			<uniqueID>1</uniqueID>
+		</entry>
+	</host>
+</schedule>

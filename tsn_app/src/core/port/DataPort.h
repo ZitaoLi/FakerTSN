@@ -18,7 +18,7 @@
 
 namespace faker_tsn {
 
-class DataPort : public IPort, public std::enable_shared_from_this<DataPort> {
+class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, public REFLECT_OBJECT, public DynamicCreator<DataPort, const char*> {
    private:
     const uint8_t m_deviceID;
     const char* m_deviceName;                        /* device name */
@@ -96,6 +96,11 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort> {
 
     /* input something into port */
     virtual void input(void*, size_t, RELAY_ENTITY type) override;
+
+    /* output something */
+    virtual void* output() override;
+
+    virtual void setTimer() override;
 
     virtual std::string toString() override {
         std::stringstream ss;

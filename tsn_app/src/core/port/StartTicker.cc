@@ -23,11 +23,10 @@ void StartTicker::operator()() {
     runState->doAction(TSNContext::getInstance());
 
     /* register gate control list item into timer */
-    INFO("register GCL items");
+    INFO("register timer");
     auto ports = TSNContext::getInstance().getPortManager()->getPorts();
     for (auto port: ports) {
-        auto gcl = std::dynamic_pointer_cast<DataPort>(port)->getGCL();
-        gcl->registerGCLfromSchedules();
+        port->setTimer();
     }
 
     /* start timer */

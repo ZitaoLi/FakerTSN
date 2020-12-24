@@ -63,6 +63,11 @@ class ConsolePort : public IPort, public std::enable_shared_from_this<ConsolePor
     /* input something into port */
     virtual void input(void*, size_t, RELAY_ENTITY type) override;
 
+    /* output something */
+    virtual void* output() override;
+
+    virtual void setTimer() override {}
+
     virtual std::string toString() override {
         std::stringstream ss;
         ss << "console";

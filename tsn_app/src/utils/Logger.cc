@@ -11,7 +11,6 @@ const uint8_t Logger::ERROR = 4;
 
 Logger::Logger()
 {
-    printf("%p \n", this);
     this->m_level = Logger::INFO;
     this->m_path = "./log/log";
     this->m_mode = "std";
