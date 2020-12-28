@@ -17,6 +17,7 @@ DIR_SRC_NETWORKING_INTERFACE = $(DIR_SRC_NETWORKING)/interface
 DIR_SRC_UTILS_REFLECTOR = $(DIR_SRC_UTILS)/reflector
 DIR_SRC_UTILS_CONFIG = $(DIR_SRC_UTILS)/config
 DIR_SRC_TIMER = $(DIR_SRC)/timer
+DIR_SRC_NODE = $(DIR_SRC)/node
 
 #获取当前正在执行的Makefile的绝对路径
 MKFILE_PATH := patsubst$(%/, %, dir $($(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -34,6 +35,7 @@ SRCS	+= $(wildcard $(DIR_SRC_NETWORKING_INTERFACE)/*.cc)
 SRCS  	+= $(wildcard ${DIR_SRC_UTILS_REFLECTOR}/*.cc)
 SRCS	+= $(wildcard ${DIR_SRC_UTILS_CONFIG}/*.cc)
 SRCS	+= $(wildcard ${DIR_SRC_TIMER}/*.cc)
+SRCS	+= $(wildcard ${DIR_SRC_NODE}/*.cc)
 MAIN	:= ./src/main.cc
 MAIN	+= $(SRCS)	
 # GTEST	:= ./test/gtest_main.cc
@@ -129,6 +131,9 @@ ${DIR_BIN}/%.o:$(DIR_SRC_UTILS_REFLECTOR)/%.cc
 
 ${DIR_BIN}/%.o:$(DIR_SRC_UTILS_CONFIG)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
+
+${DIR_BIN}/%.o:$(DIR_SRC_NODE)/%.cc
+	$(CXX) $(CFLAGS) -c $< -o $@  
 
 rebuild: cleanall
 

@@ -60,6 +60,7 @@ static void Switch() {
 
 
     TSNContext& context = TSNContext::getInstance();
+    INFO("TSN_CONTEXT_STATE: down -> init");
     std::shared_ptr<InitTSNContextState> initState = std::make_shared<InitTSNContextState>();
     initState->doAction(context);
 }
