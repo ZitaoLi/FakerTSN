@@ -11,7 +11,7 @@
 			<period>2000000</period>
 			<pcp>7</pcp>
 			<dest>01:00:00:00:00:04</dest>
-			<group>01:00:00:00:00:04</group>
+			<group>01-00-5E-00-00-01</group>
 			<!-- byte -->
 			<!-- maximum = 1490B -->
 			<size>8000</size>

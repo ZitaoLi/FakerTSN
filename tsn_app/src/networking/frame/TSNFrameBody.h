@@ -12,13 +12,11 @@
 namespace faker_tsn {
 
 class TSNFrameBody : public IFrameBody {
-   private:
+   protected:
     unsigned short m_pcp;               /* priority code point */
     unsigned short m_vid;               /* vlan id */
     unsigned short m_seq;               /* sequencr nubmer */
-    unsigned int m_bytes;               /* no. of bytes */
-    unsigned char m_data[ETH_DATA_LEN]; /* data */
-
+    
    public:
     TSNFrameBody() = default;
 
@@ -45,11 +43,6 @@ class TSNFrameBody : public IFrameBody {
         this->m_seq = seq;
     }
 
-    void setData(unsigned char* data, unsigned int len) {
-        memcpy(this->m_data, data, len);
-        this->m_bytes = len;
-    }
-
     unsigned short getPCP() {
         return this->m_pcp;
     }
@@ -60,10 +53,6 @@ class TSNFrameBody : public IFrameBody {
 
     unsigned short getSeq() {
         return this->m_seq;
-    }
-
-    virtual unsigned int getBytes() override {
-        return this->m_bytes;
     }
 };
 

@@ -6,6 +6,7 @@ SendTSNFrameEventHandler::SendTSNFrameEventHandler(
     HANDLE handle,
     struct sockaddr_ll& sockAddrII,
     IPort* port) : m_handle(handle), m_port(port) {
+    this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
     memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
 }
 
@@ -32,11 +33,23 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
 
     INFO("Encode frame");
     INFO("------------- TSN frame  --------------");
+    
+    unsigned char dest[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    if (!this->m_isEnhanced) {
+        auto it = MacTable::peers.find(this->m_port->getDeviceID());
+        if (it == MacTable::peers.end()) {
+            ERROR("invalid peer mac");
+            return;
+        }
+        memcpy(dest, it->second, ETH_ALEN);
+    } else {
+        EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frameBody);
+        _f->getMac(dest);
+    }
 
     /* construct ethernet header */
     struct ethhdr eth_hdr;
     memset(&eth_hdr, 0x00, sizeof(eth_hdr));
-    unsigned char dest[ETH_ALEN] = {0x01, 0x00, 0x5E, 0x00, 0x00, 0x01};
     memcpy(&eth_hdr.h_dest, dest, ETH_ALEN);                           // set dest mac
     memcpy(&eth_hdr.h_source, this->m_sockAddrII.sll_addr, ETH_ALEN);  // set src mac
     eth_hdr.h_proto = htons(ETH_P_ALL);                                // set IEEE 802.1Q protocol
@@ -63,33 +76,40 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     memset(&rtag, 0x00, sizeof(rtag));
     rtag.h_rtag_seq_num = htons(seq);  // set
     rtag.h_rtag_encapsulated_proto = htons(ETH_P_IP);
+    if (this->m_isEnhanced) {
+        RTCI r_tci;
+        EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frameBody);
+        r_tci.fid = _f->getFlowId();
+        r_tci.phs = _f->getPhase();
+        __be16 rsv = RTCI::encode(r_tci);
+        rtag.h_rtag_rsved = rsv;
+    }  
     INFO("reserved = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_rsved), 2));
     INFO("sequence number = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_seq_num), 2));
     INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_encapsulated_proto), 2));
 
     /* construct TSN frame */
     union tsn_frame frame;
-    const char* data = "hello world\n";
-    unsigned int data_len = strlen(data);
+    unsigned int data_len = frameBody->getBytes();
+    unsigned char* data = (unsigned char*)malloc(data_len);
+    frameBody->getData(data, data_len);
     unsigned int frame_len = data_len + ETH_HLEN + 4 + 6;
     memset(&frame, 0x00, sizeof(tsn_frame));
     INFO("TSN frame length = " + std::to_string(frame_len));
     memcpy(&frame.filed.header.eth_hdr, &eth_hdr, sizeof(eth_hdr));
     memcpy(&frame.filed.header.vlan_tag, &vlan_tag, sizeof(vlan_tag));
     memcpy(&frame.filed.header.r_tag, &rtag, sizeof(rtag));
-    memcpy(frame.filed.data, data, strlen(data));
-    // INFO("data = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(frame.filed.data), data_len));
+    memcpy(frame.filed.data, data, data_len);
     INFO("data(string) = " + std::string((char*)frame.filed.data));
-
-    // /* set dest mac for sockaddr_ll */
-    // memcpy((void*)(&this->m_sockAddrII.sll_addr), (void*)dest, ETH_ALEN);
 
     /* send data */
     int fd = this->m_handle;
+    // TODO frame size must not more than 1514
+    frame_len = (frame_len > ETH_FRAME_LEN) ? ETH_FRAME_LEN : frame_len;
     if (sendto(fd, frame.buffer, frame_len, 0, (struct sockaddr*)&this->m_sockAddrII, sizeof(this->m_sockAddrII)) > 0)
         INFO("Send success!");
     else
-        INFO("Send error!");
+        ERROR("Send error: " + std::string(strerror(errno)));
 }
 
 }  // namespace faker_tsn

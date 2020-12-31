@@ -2,22 +2,35 @@
 #define _I_FRAME_BODY_H
 
 #include <linux/if_packet.h>
+#include <linux/if_ether.h>
 #include <string>
+#include <string.h>
 
 #include "RelayEntity.h"
-
-#define MAX_FRAME_SIZE 1500
 
 namespace faker_tsn {
 
 class IFrameBody {
-   private:
+   protected:
     RELAY_ENTITY m_type;
+    unsigned char m_data[ETH_DATA_LEN];
+    unsigned int m_bytes;
 
    public:
     virtual ~IFrameBody() = default;
 
-    virtual unsigned int getBytes() = 0;
+    void setData(unsigned char* data, unsigned int len) {
+        memcpy(this->m_data, data, len);
+        this->m_bytes = len;
+    }
+
+    void* getData(unsigned char* buf, unsigned int len) {
+        memcpy(buf, this->m_data, len);
+    }
+
+    unsigned int getBytes() {
+        return this->m_bytes;
+    }
 
     virtual std::string toString() {
         return "IFrameBody";

@@ -13,6 +13,7 @@
 #include "../utils/container/ConvertUtils.h"
 #include "IEventHandler.h"
 #include "VlanTCI.h"
+#include "RTCI.h"
 #include "frame/TSNFrameBody.h"
 #include "if_ether.h"
 
@@ -30,7 +31,7 @@ class RecvTSNFrameEventHandler : public IEventHandler {
 
     virtual ~RecvTSNFrameEventHandler() override;
 
-    /* hook method that is called by Reactor */
+    /* hook method that is called by Reactor */                                                                                   
     virtual void handle_event(EVENT_TYPE eventType) override;
 
     /* hook method that returns smart pointer of HANDLE */

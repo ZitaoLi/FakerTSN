@@ -3,6 +3,7 @@
 namespace faker_tsn {
 
 std::unordered_map<mac_token, ForwardPair> MacTable::items;
+std::unordered_map<unsigned short, unsigned char*> MacTable::peers;
 
 std::string MacTable::toString() {
     std::stringstream ss;
@@ -10,7 +11,16 @@ std::string MacTable::toString() {
         ss << "MAC_TOKEN: " << it->first;
         ss << " ";
         ss << it->second.toString();
-        ss << std::endl;
+        ss << "\n";
+    }
+    for (auto it = MacTable::peers.begin(); it != MacTable::peers.end(); it++) {
+        char mac_str[32];
+        unsigned char* dest_mac = it->second;
+        sprintf(mac_str, "%.2X:%.2X:%.2X:%.2X:%.2X:%.2X", dest_mac[0], dest_mac[1], dest_mac[2], dest_mac[3], dest_mac[4], dest_mac[5]);
+        ss << "PORT_ID: " << std::to_string(it->first);
+        ss << " ";
+        ss << "PEER_MAC: " << std::string(mac_str);
+        ss << "\n";
     }
     return ss.str();
 }
@@ -32,6 +42,18 @@ void MacTable::loadRouteXML(std::string filename) {
     }
     /* get static list */
     XMLElement* staticList = fileterDB->FirstChildElement("static");
+    /* get port list */
+    XMLElement* portList = staticList->FirstChildElement("ports");
+    /* get port */
+    XMLElement* port = portList->FirstChildElement("port");
+    while (port) {
+        unsigned short portId = atoi(port->Attribute("id"));
+        const char* macString = port->Attribute("peerMacAddress");
+        unsigned char mac[ETH_ALEN];
+        MacTable::parseMacAddress(macString, mac);
+        MacTable::addPeer(portId, mac);
+        port = port->NextSiblingElement();
+    }
     /* get forward contents */
     XMLElement* forwardList = staticList->FirstChildElement("forward");
     /* get individual address */

@@ -3,6 +3,7 @@
 
 #include <netinet/if_ether.h>
 #include <tinyxml2/tinyxml2.h>
+#include <stdio.h>
 
 #include <exception>
 #include <functional>
@@ -32,6 +33,24 @@ struct ForwardPair {
             ss << *it << " ";
         }
         ss << "TIMEOUT: " << timeout;
+        return ss.str();
+    }
+};
+
+struct Peer {
+    unsigned short port;
+    unsigned char dest_mac[ETH_ALEN];
+
+    Peer(unsigned short port, unsigned char* mac) : port(port) {
+        memcpy(dest_mac, mac, ETH_ALEN);
+    }
+
+    std::string toString() {
+        std::stringstream ss;
+        ss << "PORT: ";
+        char mac_str[32];
+        sprintf(mac_str, "%.2X:%.2X:%.2X:%.2X:%.2X:%.2X", dest_mac[0], dest_mac[1], dest_mac[2], dest_mac[3], dest_mac[4], dest_mac[5]);
+        ss << "MAC: " << std::string(mac_str);
         return ss.str();
     }
 };
@@ -94,6 +113,7 @@ class LackOfTagException : public std::exception {
 
 struct MacTable {
     static std::unordered_map<mac_token, ForwardPair> items;  // <mac addr, forward pair> map
+    static std::unordered_map<unsigned short, unsigned char*> peers;
 
     static void loadRouteXML(std::string filename);
 
@@ -128,6 +148,27 @@ struct MacTable {
         if (it != MacTable::items.end()) {
             it->second.ports = ports;
             it->second.timeout = timeout;
+        }
+    }
+
+    static void addPeer(unsigned short port, const unsigned char* mac) {
+        unsigned char* peer_mac;
+        peer_mac = (unsigned char*)malloc(ETH_ALEN);
+        memcpy(peer_mac, mac, ETH_ALEN);
+        MacTable::peers.insert(std::pair<unsigned short, unsigned char*>(port, peer_mac));
+    }
+
+    static void removePeer(unsigned short port) {
+        auto it = MacTable::peers.find(port);
+        if (it != MacTable::peers.end()) {
+            MacTable::peers.erase(it);
+        }
+    }
+
+    static void updatePeer(unsigned short port, unsigned char* mac) {
+        auto it = MacTable::peers.find(port);
+        if (it != MacTable::peers.end()) {
+            memcpy(it->second, mac, ETH_ALEN);
         }
     }
 

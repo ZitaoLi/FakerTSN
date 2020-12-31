@@ -2,45 +2,26 @@
 <filteringDatabases>
   <filteringDatabase id="host1">
     <static>
+      <ports>
+        <port id="0" name="h1-eth0" peerMacAddress="00-00-00-00-00-02" macAddress="00-00-00-00-00-01"/>
+      </ports>
       <forward>
         <individualAddress port="0" macAddress="00-00-00-00-00-01"/>
-        <multicastAddress ports="0 2" macAddress="01-00-00-00-00-01"/>
-      </forward>
-    </static>
-  </filteringDatabase>
-  <filteringDatabase id="switch2">
-    <static>
-      <forward>
-        <individualAddress port="0 2" macAddress="00-00-00-00-00-12"/>
-        <multicastAddress ports="0 2" macAddress="01-00-00-00-00-01"/>
-        <individualAddress port="0 2" macAddress="00-00-00-00-00-0C"/>
+        <multicastAddress ports="0" macAddress="01-00-5E-00-00-01"/>
       </forward>
     </static>
   </filteringDatabase>
   <filteringDatabase id="switch1">
     <static>
+      <ports>
+        <port id="0" name="s2-eth0" peerMacAddress="00-00-00-00-00-01"/>
+        <port id="1" name="s2-eth1" peerMacAddress="00-00-00-00-00-03"/>
+        <port id="2" name="s2-eth2" peerMacAddress="00-00-00-00-00-04"/>
+      </ports>
       <forward>
         <individualAddress port="1" macAddress="00-00-00-00-00-01"/>
         <multicastAddress ports="1 2" macAddress="01-00-5E-00-00-01"/>
         <individualAddress port="2" macAddress="00-00-00-00-00-0C"/>
-      </forward>
-    </static>
-  </filteringDatabase>
-  <filteringDatabase id="switch4">
-    <static>
-      <forward>
-        <individualAddress port="1" macAddress="00-00-00-00-00-12"/>
-        <multicastAddress ports="1" macAddress="01-00-00-00-00-01"/>
-        <individualAddress port="1" macAddress="00-00-00-00-00-0C"/>
-      </forward>
-    </static>
-  </filteringDatabase>
-  <filteringDatabase id="switch5">
-    <static>
-      <forward>
-        <individualAddress port="2" macAddress="00-00-00-00-00-12"/>
-        <multicastAddress ports="2 0" macAddress="01-00-00-00-00-01"/>
-        <individualAddress port="0" macAddress="00-00-00-00-00-0C"/>
       </forward>
     </static>
   </filteringDatabase>

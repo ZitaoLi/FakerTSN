@@ -5,8 +5,9 @@
 namespace faker_tsn
 {
 
-FlowApp::FlowApp(const char* deviceName) : m_deviceName(deviceName), flowIndex(0), flowNum(0), frameCount(0), lastFrameSize(MAX_FRAME_SIZE) {
+FlowApp::FlowApp(const char* deviceName) : m_deviceName(deviceName), flowIndex(0), flowNum(0), frameCount(0), lastFrameSize(ETH_DATA_LEN), m_isEnhanced(false) {
     INFO(this->toString() + " construct FlowApp");
+    this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
     /* load xml */
     INFO(this->toString() +  " load flows.xml");
     std::string filename = "./config/flows.xml";
@@ -150,19 +151,38 @@ void* FlowApp::output() {
     /* construct tsn frame */
     Flow* flow = this->flows[this->flowIndex];
     INFO(this->toString() + " invoke flow " + flow->toString());
-    TSNFrameBody* frame = new TSNFrameBody();
-    int frameSize = MAX_FRAME_SIZE;
+    IFrameBody* frame;
+    int frameSize = ETH_DATA_LEN;
     if (this->frameCount == 1) {
         frameSize = this->lastFrameSize;
     }
     unsigned char* data = (unsigned char*)malloc(frameSize);
     memset(data, 0x00, frameSize);
-    frame->setPCP(flow->pcp);
-    frame->setVID(flow->vid);
-    frame->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME);
-    frame->setSeq(flow->seq++);
-    frame->setData(data, frameSize);
-    INFO(this->toString() + " construct frame:" + frame->toString());
+
+    if (!this->m_isEnhanced) {
+        frame = new TSNFrameBody();
+        TSNFrameBody* _f = dynamic_cast<TSNFrameBody*>(frame);
+        _f->setPCP(flow->pcp);
+        _f->setVID(flow->vid);
+        _f->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME);
+        _f->setSeq(flow->seq++);
+        _f->setData(data, frameSize);
+        INFO(this->toString() + " construct frame:" + _f->toString());
+    } else {
+        frame = new EnhancementTSNFrameBody();
+        EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frame);
+        _f->setPCP(flow->pcp);
+        _f->setVID(flow->vid);
+        _f->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME_E);
+        _f->setSeq(flow->seq++);
+        _f->setData(data, frameSize);
+        _f->setFlowId(1);
+        _f->setPhse(0);
+        unsigned char mac[ETH_ALEN];
+        MacTable::parseMacAddress(flow->groupMac, mac);
+        _f->setMac(mac);
+        INFO(this->toString() + " construct frame:" + _f->toString());
+    }
 
     this->frameCount -= 1;
 
@@ -189,11 +209,11 @@ void FlowApp::setTimer() {
 }
 
 void registerFlowToTimer(FlowApp* app, Flow* flow, Time::TimeInterval& interval) {
-    app->lastFrameSize = flow->size % MAX_FRAME_SIZE;
-    app->frameCount = flow->size / MAX_FRAME_SIZE;
+    app->lastFrameSize = flow->size % ETH_DATA_LEN;
+    app->frameCount = flow->size / ETH_DATA_LEN;
     if (app->lastFrameSize != 0) {
         app->frameCount += 1;
-        app->lastFrameSize = MAX_FRAME_SIZE;
+        app->lastFrameSize = ETH_DATA_LEN;
     }
     INFO(app->toString() + "[f" + std::to_string(flow->uniqueID) + "] no. of frame = " + std::to_string(app->frameCount));
 

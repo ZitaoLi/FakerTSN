@@ -23,7 +23,7 @@
 #define RTAG_VLAN_ETH_ZLEN 64 /* Min. octets in frame sans FCS */
 
 #define RTAG_VLAN_ETH_DATA_LEN 1500  /* Max. octets in payload        */
-#define RTAG_VLAN_ETH_FRAME_LEN 1518 /* Max. octets in frame sans FCS */
+#define RTAG_VLAN_ETH_FRAME_LEN 1524 /* Max. octets in frame sans FCS */
 
 /*
  *  struct vlan_hdr - vlan header
@@ -109,7 +109,7 @@ union tsn_frame {
         struct tsn_hdr header;
         unsigned char data[ETH_DATA_LEN];
     } __attribute__((packed, aligned(1))) filed;
-    unsigned char buffer[ETH_FRAME_LEN];
+    unsigned char buffer[RTAG_VLAN_ETH_FRAME_LEN];
 } __attribute__((packed));
 
 #endif

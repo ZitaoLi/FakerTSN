@@ -6,11 +6,14 @@
 #include <memory>
 
 #include "../core/queue/QueueContext.h"
+#include "../core/forward/MacTable.h"
+#include "../core/forward/MulticastMacTable.h"
 #include "../utils/Log.h"
 #include "../utils/container/ConvertUtils.h"
 #include "IEventHandler.h"
 #include "Reactor.h"
 #include "VlanTCI.h"
+#include "RTCI.h"
 #include "frame/TSNFrameBody.h"
 #include "if_ether.h"
 
@@ -21,6 +24,7 @@ class SendTSNFrameEventHandler : public IEventHandler {
     HANDLE m_handle;
     struct sockaddr_ll m_sockAddrII;
     IPort* m_port;
+    bool m_isEnhanced;
 
    public:
     SendTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port);

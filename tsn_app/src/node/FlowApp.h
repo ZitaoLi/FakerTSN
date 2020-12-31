@@ -71,6 +71,7 @@ private:
     int m_iSockfd;
     int m_oSockfd;
     std::shared_ptr<LinkLayerInterface> m_inf;
+    bool m_isEnhanced;
 
 public:
     std::vector<Flow*> flows;
