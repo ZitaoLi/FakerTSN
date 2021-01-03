@@ -105,7 +105,7 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
     virtual std::string toString() override {
         std::stringstream ss;
         ss << "Port[";
-        ss << "id:" << this->m_deviceID;
+        ss << "id:" << std::to_string(this->m_deviceID);
         ss << "|";
         ss << "name:" << this->m_deviceName;
         ss << "]";

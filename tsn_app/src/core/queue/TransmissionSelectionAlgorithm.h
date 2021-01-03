@@ -9,19 +9,19 @@
 namespace faker_tsn {
 
 class TransmissionSelectionAlgorithm {
-   private:
+   protected:
     uint8_t m_pcp;
     std::shared_ptr<InnerBuffer> m_innerBuffer;
 
    public:
     TransmissionSelectionAlgorithm(std::shared_ptr<InnerBuffer> innerBuffer);
-    ~TransmissionSelectionAlgorithm();
+    virtual ~TransmissionSelectionAlgorithm();
 
     inline uint8_t getPCP() {
         return this->m_pcp;
     }
 
-    IFrameBody* dequeue();
+    virtual IFrameBody* dequeue();
 };
 
 }  // namespace faker_tsn

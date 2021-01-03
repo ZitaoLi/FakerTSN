@@ -34,6 +34,7 @@ void QueueContext::enqueue(IFrameBody* frame) {
         this->m_queues[pcp]->enqueue(tsnFrame);
     } else if (frame->getType() == IEEE_802_1Q_FRAME) {  // IEEE 802.1Q frame
         // TODO
+        INFO("normal frame");
     }
 }
 

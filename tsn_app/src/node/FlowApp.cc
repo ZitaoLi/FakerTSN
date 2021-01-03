@@ -5,7 +5,14 @@
 namespace faker_tsn
 {
 
-FlowApp::FlowApp(const char* deviceName) : m_deviceName(deviceName), flowIndex(0), flowNum(0), frameCount(0), lastFrameSize(ETH_DATA_LEN), m_isEnhanced(false) {
+FlowApp::FlowApp(const char* deviceName) : 
+    m_deviceName(deviceName), 
+    flowIndex(0), 
+    flowNum(0), 
+    iframeCount(0), 
+    oframeCount(0), 
+    lastFrameSize(ETH_DATA_LEN), 
+    m_isEnhanced(false) {
     INFO(this->toString() + " construct FlowApp");
     this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
     /* load xml */
@@ -42,38 +49,41 @@ void FlowApp::loadScheduleXML(std::string filename) {
     INFO("hyper period:\t" + std::to_string(hyperPeriod));
     /* get flows */
     XMLElement* device = schedule->FirstChildElement("host");
-    while (strcmp(device->Attribute("name"), ConfigSetting::getInstance().get<const char*>("deviceName")) != 0) {
+    if (device == 0) return;
+    while (device != 0 && strcmp(device->Attribute("name"), ConfigSetting::getInstance().get<const char*>("deviceName")) != 0) {
         device = device->NextSiblingElement();
     }
-    XMLElement* entry = device->FirstChildElement("entry");
-    while (entry) {
-        Flow* flow = new Flow();
-        flow->startOffset = Time::converIntegerToTimeInterval(
-            atoi(entry->FirstChildElement("start")->GetText()),
-            timeUnit
-        );
-        flow->durationInterval = Time::converIntegerToTimeInterval(
-            atoi(entry->FirstChildElement("duration")->GetText()),
-            timeUnit
-        );
-        flow->periodInterval = Time::converIntegerToTimeInterval(
-            atoi(entry->FirstChildElement("period")->GetText()),
-            timeUnit
-        );
-        flow->pcp = atoi(entry->FirstChildElement("pcp")->GetText());
-        flow->size = ConvertUtils::converSizeToByte(
-            atoi(entry->FirstChildElement("size")->GetText()), 
-            sizeUnit
-        );
-        flow->destMac = entry->FirstChildElement("dest")->GetText();
-        flow->groupMac = entry->FirstChildElement("group")->GetText();
-        flow->uniqueID = atoi(entry->FirstChildElement("uniqueID")->GetText());
-        INFO("[" + this->m_deviceName + "] add flow: " + flow->toString());
-        this->flows.push_back(std::move(flow));
-        this->flowNum += 1;
-        entry = entry->NextSiblingElement();
+    if (device != 0) {
+        XMLElement* entry = device->FirstChildElement("entry");
+        while (entry) {
+            Flow* flow = new Flow();
+            flow->startOffset = Time::converIntegerToTimeInterval(
+                atoi(entry->FirstChildElement("start")->GetText()),
+                timeUnit
+            );
+            flow->durationInterval = Time::converIntegerToTimeInterval(
+                atoi(entry->FirstChildElement("duration")->GetText()),
+                timeUnit
+            );
+            flow->periodInterval = Time::converIntegerToTimeInterval(
+                atoi(entry->FirstChildElement("period")->GetText()),
+                timeUnit
+            );
+            flow->pcp = atoi(entry->FirstChildElement("pcp")->GetText());
+            flow->size = ConvertUtils::converSizeToByte(
+                atoi(entry->FirstChildElement("size")->GetText()), 
+                sizeUnit
+            );
+            flow->destMac = entry->FirstChildElement("dest")->GetText();
+            flow->groupMac = entry->FirstChildElement("group")->GetText();
+            flow->uniqueID = atoi(entry->FirstChildElement("uniqueID")->GetText());
+            INFO("[" + this->m_deviceName + "] add flow: " + flow->toString());
+            this->flows.push_back(std::move(flow));
+            this->flowNum += 1;
+            entry = entry->NextSiblingElement();
+        }
+        std::sort(this->flows.begin(), this->flows.end(), _compare);
     }
-    std::sort(this->flows.begin(), this->flows.end(), _compare);
 }
 
 /* change current state */
@@ -134,17 +144,29 @@ void FlowApp::registerEventHandler() {
     std::shared_ptr<IEventHandler> oHandler = std::make_shared<SendTSNFrameEventHandler>(this->m_oSockfd, *addr_ll, this);
     Reactor::getInstance().register_handler(oHandler, EVENT_TYPE::WRITE);
     INFO(this->toString() +  "register SendTSNFrameEventHandler in Reactor");
+    /* register for inbound socket */
+    std::shared_ptr<IEventHandler> recvTSNFrameEventHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_iSockfd, *addr_ll, this);
+    Reactor::getInstance().register_handler(recvTSNFrameEventHandler, EVENT_TYPE::READ);
+    INFO(this->toString() +  "register RecvTSNFrameEventHandler in Reactor");
 }
 
 /* input something into port */
-void FlowApp::input(void*, size_t, RELAY_ENTITY type) {
-    // TODO
+void FlowApp::input(void* data, size_t len, RELAY_ENTITY type) {
+    IFrameBody* frame;
+    if (type == IEEE_802_1Q_TSN_FRAME) {
+        INFO("Input TSN frame");
+        frame = reinterpret_cast<TSNFrameBody*>(data);
+    } else if (type == IEEE_802_1Q_TSN_FRAME_E) {
+        INFO("Input enhanced-TSN frame");
+        frame = reinterpret_cast<EnhancementTSNFrameBody*>(data);
+    }
+    INFO(this->toString() + " received frames: " + std::to_string(++this->oframeCount));
 }
 
 /* output something */
 void* FlowApp::output() {
     INFO(this->toString() + " output oncall");
-    if (this->frameCount == 0) {
+    if (this->iframeCount == 0) {
         return nullptr;
     }
 
@@ -153,7 +175,7 @@ void* FlowApp::output() {
     INFO(this->toString() + " invoke flow " + flow->toString());
     IFrameBody* frame;
     int frameSize = ETH_DATA_LEN;
-    if (this->frameCount == 1) {
+    if (this->iframeCount == 1) {
         frameSize = this->lastFrameSize;
     }
     unsigned char* data = (unsigned char*)malloc(frameSize);
@@ -184,38 +206,25 @@ void* FlowApp::output() {
         INFO(this->toString() + " construct frame:" + _f->toString());
     }
 
-    this->frameCount -= 1;
+    this->iframeCount -= 1;
 
     return (void*)frame;
 }
 
 void FlowApp::setTimer() {
+    if (this->flows.empty()) return;
     Flow* flow = this->flows[this->flowIndex];
-    // this->lastFrameSize = flow->size % MAX_FRAME_SIZE;
-    // this->frameCount = flow->size / MAX_FRAME_SIZE;
-    // if (this->lastFrameSize != 0) {
-    //     this->frameCount += 1;
-    //     this->lastFrameSize = MAX_FRAME_SIZE;
-    // }
-    // INFO(this->toString() + "[f" + std::to_string(flow->uniqueID) + "] no. of frame = " + std::to_string(this->frameCount));
-
-    // // TODO add ticker
-    // INFO(this->toString() + "[f" + std::to_string(flow->uniqueID) + "] register to timer");
-    // Time::TimePoint startTime(0, 0);
-    // Ticker* ticker = new FlowTicker(startTime, flow->periodInterval, this);
-    // TimeContext::getInstance().getTimer()->addTicker(ticker);
-
     registerFlowToTimer(this, flow, flow->periodInterval);
 }
 
 void registerFlowToTimer(FlowApp* app, Flow* flow, Time::TimeInterval& interval) {
     app->lastFrameSize = flow->size % ETH_DATA_LEN;
-    app->frameCount = flow->size / ETH_DATA_LEN;
+    app->iframeCount = flow->size / ETH_DATA_LEN;
     if (app->lastFrameSize != 0) {
-        app->frameCount += 1;
+        app->iframeCount += 1;
         app->lastFrameSize = ETH_DATA_LEN;
     }
-    INFO(app->toString() + "[f" + std::to_string(flow->uniqueID) + "] no. of frame = " + std::to_string(app->frameCount));
+    INFO(app->toString() + "[f" + std::to_string(flow->uniqueID) + "] no. of frame = " + std::to_string(app->iframeCount));
 
     // TODO add ticker
     INFO(app->toString() + "[f" + std::to_string(flow->uniqueID) + "] register to timer");

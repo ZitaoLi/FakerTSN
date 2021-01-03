@@ -154,7 +154,7 @@ void DataPort::registerEventHandler() {
     this->m_interface->getMacAddress()->getRawSockAddr((struct sockaddr**)&addr_ll);
 
     /* register for inbound socket */
-    std::shared_ptr<IEventHandler> recvTSNFrameEventHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_inSockfd, *addr_ll);
+    std::shared_ptr<IEventHandler> recvTSNFrameEventHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_inSockfd, *addr_ll, this);
     // std::shared_ptr<IEventHandler> recvTSNFrameEventHandler(dynamic_cast<IEventHandler*>(REFLECTOR::CreateByTypeName(
     //     "faker_tsn::RecvTSNFrameEventHandler", 
     //     (int)this->m_inSockfd, 
@@ -228,13 +228,11 @@ void DataPort::input(void* data, size_t len, RELAY_ENTITY type) {
     if (type == IEEE_802_1Q_TSN_FRAME) {
         INFO("Input TSN frame");
         TSNFrameBody* frame = reinterpret_cast<TSNFrameBody*>(data);
-        frame->setType(type);
         this->m_queueContext->enqueue(frame);
     } else if (type == IEEE_802_1Q_TSN_FRAME_E) {
         INFO("Input enhanced-TSN frame");
         EnhancementTSNFrameBody* frame = reinterpret_cast<EnhancementTSNFrameBody*>(data);
-        frame->setType(type);
-        this->m_queueContext->enqueue(reinterpret_cast<EnhancementTSNFrameBody*>(data));
+        this->m_queueContext->enqueue(frame);
     }
 }
 

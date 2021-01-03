@@ -187,6 +187,10 @@ void PQTimer::start() {
 LOOP:
     /* get first ticker */
     Ticker* ticker = this->getTicker();
+    if (!ticker) {
+        INFO("empty timer");
+        return;
+    }
     INFO("Get Ticker : " + ticker->toString());
     // this->removeTicker();
 

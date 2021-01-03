@@ -23,11 +23,13 @@ class RecvTSNFrameEventHandler : public IEventHandler {
    private:
     HANDLE m_handle;
     struct sockaddr_ll m_sockAddrII;
+    IPort* m_port;
     std::shared_ptr<QueueContext> m_queueContext;
     bool m_isEnhanced;
+    bool m_isSwitch;
 
    public:
-    RecvTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII);
+    RecvTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port);
 
     virtual ~RecvTSNFrameEventHandler() override;
 

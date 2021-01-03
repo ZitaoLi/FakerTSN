@@ -38,6 +38,10 @@ class TransmissionGate : public std::enable_shared_from_this<TransmissionGate> {
         return this->m_isOpen;
     }
 
+    inline std::shared_ptr<TransmissionSelectionAlgorithm> getTransmissionSelectionAlogirthm() {
+        return this->m_algorithm;
+    }
+
     /* dequeue head frame */
     virtual IFrameBody* dequeue();
 

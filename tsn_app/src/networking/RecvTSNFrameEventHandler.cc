@@ -4,10 +4,11 @@ namespace faker_tsn {
 
 const __be16 RecvTSNFrameEventHandler::s_protocol = htons(ETH_P_TSN);
 
-RecvTSNFrameEventHandler::RecvTSNFrameEventHandler(
-    HANDLE handle, struct sockaddr_ll& sockAddrII) : m_handle(handle) {
+RecvTSNFrameEventHandler::RecvTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port) : m_handle(handle), m_port(port) {
     memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
     this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
+    std::string workMode = ConfigSetting::getInstance().get<std::string>("workMode");
+    this->m_isSwitch = (workMode == "switch") ? true : false;
 }
 
 RecvTSNFrameEventHandler::~RecvTSNFrameEventHandler() {
@@ -102,10 +103,16 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
         _f->setFlowId(r_tci.fid);
         _f->setPhse(r_tci.phs);
     }
+    frame->setType(type);
     frame->setData(recvbuf + 24, strlen((char*)recvbuf + 24));
 
-    /* forward frame */
-    ForwardFunction::forward(srcMac, destMac, reinterpret_cast<void*>(frame), len, type);
+    if (this->m_isSwitch) {
+        /* forward frames */
+        ForwardFunction::forward(srcMac, destMac, reinterpret_cast<void*>(frame), len, type);
+    } else {
+        /* delivery frames */
+        this->m_port->input((void*)frame, len, type);
+    }
 }
 
 HANDLE RecvTSNFrameEventHandler::getHandle() {

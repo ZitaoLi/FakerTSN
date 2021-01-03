@@ -77,7 +77,8 @@ public:
     std::vector<Flow*> flows;
     int flowNum;
     int flowIndex;            /* index of current flow */
-    int frameCount;
+    int iframeCount;
+    int oframeCount;
     int lastFrameSize;
 
 public:

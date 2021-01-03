@@ -11,6 +11,17 @@
       </forward>
     </static>
   </filteringDatabase>
+  <filteringDatabase id="host3">
+    <static>
+      <ports>
+        <port id="0" name="h3-eth0" peerMacAddress="16-e8-89-ef-d6-c0" macAddress="00-00-00-00-00-03"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-03"/>
+        <multicastAddress ports="0" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
   <filteringDatabase id="switch1">
     <static>
       <ports>
