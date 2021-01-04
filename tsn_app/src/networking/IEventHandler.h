@@ -5,6 +5,8 @@
 #include <memory>
 #include <assert.h>
 
+#define COMMAND_SIZE 100
+
 namespace faker_tsn
 {
 

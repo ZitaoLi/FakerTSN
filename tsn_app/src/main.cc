@@ -52,6 +52,9 @@ int main(int argc, char **argv) {
     } else if (mode == "switch") {
         TSNSwitch relaySystem;
         relaySystem.run();
+    } else if (mode == "configurator") {
+        TSNConfigurator controlSystem;
+        controlSystem.run();
     } else {
         ERROR("invalid work mode");
         exit(EXIT_FAILURE);

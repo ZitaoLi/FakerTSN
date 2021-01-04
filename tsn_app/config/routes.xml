@@ -1,5 +1,20 @@
 <?xml version='1.0' encoding='utf-8'?>
 <filteringDatabases>
+  <filteringDatabase id="c1">
+    <static>
+      <ports>
+        <port id="0" name="c1-eth0" peerMacAddress="00-00-00-00-00-01" macAddress="00-00-00-00-00-05"/>
+        <port id="0" name="c1-eth1" peerMacAddress="32:e4:50:60:69:28" macAddress="76:d4:e0:bf:f3:bf"/>
+        <port id="0" name="c1-eth2" peerMacAddress="00-00-00-00-00-02" macAddress="d2:ed:fd:69:bd:b9"/>
+        <port id="0" name="c1-eth3" peerMacAddress="00-00-00-00-00-03" macAddress="26:2b:d0:d3:e5:f3"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-01"/>
+        <multicastAddress ports="0 1 2 3" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
   <filteringDatabase id="host1">
     <static>
       <ports>
@@ -11,6 +26,7 @@
       </forward>
     </static>
   </filteringDatabase>
+
   <filteringDatabase id="host3">
     <static>
       <ports>

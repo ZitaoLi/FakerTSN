@@ -3,8 +3,14 @@
 
 #include <sstream>
 
-#include "../../networking/StdinEventHandler.h"
+#include <fcntl.h>
+
+#include "CreationPortState.h"
 #include "IPort.h"
+#include "../TSNContext.h"
+#include "../../networking/ControlEventHandler.h"
+#include "../../networking/CommandEventHandler.h"
+#include "../../networking/StdinEventHandler.h"
 
 namespace faker_tsn {
 
@@ -12,12 +18,12 @@ class ConsolePort : public IPort, public std::enable_shared_from_this<ConsolePor
    private:
     int m_sockfd;
     std::shared_ptr<IPortState> state;
+    std::shared_ptr<LinkLayerInterface> m_interface;
     int m_eventTypes = 0; /* event type */
+    
    public:
-    /* no. of port */
-    static uint8_t s_portNum;
-
     ConsolePort();
+
     virtual ~ConsolePort() override;
 
     /* change current state */
@@ -70,7 +76,7 @@ class ConsolePort : public IPort, public std::enable_shared_from_this<ConsolePor
 
     virtual std::string toString() override {
         std::stringstream ss;
-        ss << "console";
+        ss << "[console]";
         return ss.str();
     }
 };

@@ -41,6 +41,7 @@
 #include "../src/node/INode.h"
 #include "../src/node/TSNHost.h"
 #include "../src/node/TSNSwitch.h"
+#include "../src/node/TSNConfigurator.h"
 
 // using namespace faker_tsn;
 

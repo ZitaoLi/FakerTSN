@@ -30,6 +30,7 @@ void ControlEventHandler::handle_event(EVENT_TYPE eventType)
     
     /* receive command */
     char recvbuf[COMMAND_SIZE];
+    memset(recvbuf,0x00, COMMAND_SIZE);
     int fd = this->m_handle;
     if (read(fd, recvbuf, COMMAND_SIZE) > 0) {
         INFO("Read success!");

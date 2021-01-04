@@ -17,7 +17,7 @@ namespace faker_tsn
 class PortManager
 {
 private:
-    std::vector<const char*> m_deviceNames;
+    std::vector<std::string> m_deviceNames;
     std::vector<std::shared_ptr<IPort>> m_ports;
     std::shared_ptr<IPort> m_console_port;
     
@@ -29,8 +29,10 @@ public:
 
     ~PortManager() = default;
 
+    void init();
+
     /* get device name list */
-    std::vector<const char*>& getAllDeviceName();
+    std::vector<std::string>& getAllDeviceName();
 
     /* get port using index */
     std::shared_ptr<IPort> getPort(uint8_t index);

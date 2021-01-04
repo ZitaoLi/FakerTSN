@@ -145,8 +145,8 @@ void FlowApp::registerEventHandler() {
     Reactor::getInstance().register_handler(oHandler, EVENT_TYPE::WRITE);
     INFO(this->toString() +  "register SendTSNFrameEventHandler in Reactor");
     /* register for inbound socket */
-    std::shared_ptr<IEventHandler> recvTSNFrameEventHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_iSockfd, *addr_ll, this);
-    Reactor::getInstance().register_handler(recvTSNFrameEventHandler, EVENT_TYPE::READ);
+    std::shared_ptr<IEventHandler> iHandler = std::make_shared<RecvTSNFrameEventHandler>(this->m_iSockfd, *addr_ll, this);
+    Reactor::getInstance().register_handler(iHandler, EVENT_TYPE::READ);
     INFO(this->toString() +  "register RecvTSNFrameEventHandler in Reactor");
 }
 

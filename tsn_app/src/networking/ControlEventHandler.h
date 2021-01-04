@@ -8,8 +8,6 @@
 
 #include "IEventHandler.h"
 
-#define COMMAND_SIZE 100
-
 namespace faker_tsn
 {
 

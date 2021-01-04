@@ -12,25 +12,43 @@ const char *PortManager::s_portFilterList[] = {
 const int PortManager::s_portFilterLen = 8;
 
 PortManager::PortManager() {
+    /* initilize data ports */
+    INFO("create data ports");
+    const char* infsc = ConfigSetting::getInstance().get<const char*>("switch.port.infs");
+    char* _t = strtok(const_cast<char*>(infsc), " ");
+    while (_t) {
+        INFO("add interface [" + std::string(_t) + "]");
+        this->m_deviceNames.push_back(std::string(_t));
+        _t = strtok(NULL, " ");
+    }
+    this->createPortFromDeviceNameList();
+
     /* create console port */
+    /* console port must be created after data ports */
     INFO("create console port");
     this->m_console_port = std::make_shared<ConsolePort>();
     auto creationState = std::make_shared<CreationPortState>();
     creationState->doAction(this->m_console_port);
+}
 
-    /* initilize ports */
+void PortManager::init() {
+    /* initilize data ports */
     INFO("create data ports");
     const char* infsc = ConfigSetting::getInstance().get<const char*>("switch.port.infs");
-    std::vector<const char*> interfaces;
     char* _t = strtok(const_cast<char*>(infsc), " ");
     while (_t) {
         INFO("add interface [" + std::string(_t) + "]");
-        interfaces.push_back(_t);
+        this->m_deviceNames.push_back(std::string(_t));
         _t = strtok(NULL, " ");
     }
-    for (auto interface: interfaces)
-        this->appendDeviceName(interface);
     this->createPortFromDeviceNameList();
+
+    /* create console port */
+    /* console port must be created after data ports */
+    INFO("create console port");
+    this->m_console_port = std::make_shared<ConsolePort>();
+    auto creationState = std::make_shared<CreationPortState>();
+    creationState->doAction(this->m_console_port);
 }
 
 void PortManager::appendPort(std::shared_ptr<IPort>& port) {
@@ -64,7 +82,7 @@ void PortManager::createPortFromDeviceNameList()
         // filter unnessesarry devices
         bool flag = false;
         for (int i = 0; i < PortManager::s_portFilterLen; i++) {
-            if (strcmp(PortManager::s_portFilterList[i], *it) == 0) {
+            if (strcmp(PortManager::s_portFilterList[i], (*it).c_str()) == 0) {
                 flag = true;
                 break;
             }
@@ -72,7 +90,7 @@ void PortManager::createPortFromDeviceNameList()
         if (flag) continue;
         // create port
         std::string portClass = ConfigSetting::getInstance().get<std::string>("switch.port.class");
-        std::shared_ptr<IPort> port(dynamic_cast<IPort*>(REFLECTOR::CreateByTypeName("faker_tsn::" + portClass, (const char*)*it)));
+        std::shared_ptr<IPort> port(dynamic_cast<IPort*>(REFLECTOR::CreateByTypeName("faker_tsn::" + portClass, (const char*)(*it).c_str())));
         // std::shared_ptr<IPort> port = std::make_shared<DataPort>(*it);
         INFO("create port name:" + std::string(port->getDeviceName()) + " id:" + std::to_string(port->getDeviceID()));
         auto creationState = std::make_shared<CreationPortState>();
@@ -82,7 +100,7 @@ void PortManager::createPortFromDeviceNameList()
     }
 }
 
-std::vector<const char*>& PortManager::getAllDeviceName()
+std::vector<std::string>& PortManager::getAllDeviceName()
 {
     return this->m_deviceNames;
 }
