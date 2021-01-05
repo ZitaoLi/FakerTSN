@@ -10,16 +10,16 @@ namespace faker_tsn
 
 class GateControlTicker : public Ticker {
 private:
-    GateControlList* m_gcl;
+    TimeAwareShaper* m_gcl;
 
 public:
     GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period);
 
     GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire);
 
-    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period, GateControlList* gcl);
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period, TimeAwareShaper* gcl);
 
-    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, GateControlList* gcl);
+    GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, TimeAwareShaper* gcl);
 
     /* handler */
     void operator()() override;

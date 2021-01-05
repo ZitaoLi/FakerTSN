@@ -121,10 +121,11 @@ void DataPort::createSocket() {
     if (enabledTSN == "yes") {
         std::string gclClass = "faker_tsn::" + cs.get<std::string>("switch.gcl");
         INFO("[" + std::string(this->m_deviceName) + "][" + std::to_string(this->m_deviceID) + "] Create " + gclClass);
-        std::shared_ptr<GateControlList> gcl(dynamic_cast<GateControlList*>(REFLECTOR::CreateByTypeName(gclClass, (unsigned int)this->m_deviceID)));
+        std::shared_ptr<TimeAwareShaper> gcl(
+            dynamic_cast<TimeAwareShaper*>(
+                REFLECTOR::CreateByTypeName(
+                    gclClass, (unsigned int)this->m_deviceID)));
         this->m_gcl = gcl;
-        // GateControlList* gcl = dynamic_cast<GateControlList*>(REFLECTOR::CreateByTypeName(gclClass, (unsigned int)this->m_deviceID));
-        // this->m_gcl.reset(gcl);
         std::vector<std::shared_ptr<IQueue>> queues = this->m_queueContext->getQueues();
         for (std::shared_ptr<IQueue> queue: queues) {
             auto gate = std::dynamic_pointer_cast<IEEE8021QbvQueue>(queue)->getTransmissionGate();
@@ -132,20 +133,6 @@ void DataPort::createSocket() {
         }
         this->m_gcl->updateGates(); // first update
     }
-
-    /* mac address */
-    // char hwaddr[ETH_ALEN];
-    // if (PortManager::findMacAddress(shared_from_this(), this->getDeviceName(), hwaddr)) {
-    //     ERROR("Port[" + std::string(this->getDeviceName()) + "] fail to get mac address");
-    //     throw PortCreationException();
-    // }
-    // this->setMacAddress(hwaddr);
-    // /* hex array to string */
-    // std::stringstream ss;
-    // ss.fill('0');
-    // for (size_t i = 0; i < ETH_ALEN; ++i)
-    //     ss << std::setw(2) << std::hex << (unsigned short)hwaddr[i] << " ";
-    // INFO("Port[" + std::string(this->getDeviceName()) + "] set mac address: " + ss.str());
 }
 
 void DataPort::registerEventHandler() {

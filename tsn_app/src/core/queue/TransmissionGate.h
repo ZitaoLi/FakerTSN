@@ -48,7 +48,7 @@ class TransmissionGate : public std::enable_shared_from_this<TransmissionGate> {
     /* Observer pattern */
 
     /* register into GateControlList */
-    void registerGCL(std::shared_ptr<GateControlList> gcl);
+    void registerGCL(std::shared_ptr<TimeAwareShaper> gcl);
 
     /* callable funtion */
     void onUpdate(uint8_t pcp, bool isOpen);

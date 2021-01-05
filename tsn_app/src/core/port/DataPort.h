@@ -27,14 +27,14 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
     int m_inSockfd;                                  /* socket for receiving */
     int m_outSockfd;                                 /* socket for sending */
     std::shared_ptr<QueueContext> m_queueContext;    /* queue context */
-    std::shared_ptr<GateControlList> m_gcl;          /* gate control list */
+    std::shared_ptr<TimeAwareShaper> m_gcl;          /* gate control list */
     std::shared_ptr<LinkLayerInterface> m_interface; /* link layer interface */
     std::shared_ptr<IPortState> state;               /* port state */
     int m_eventTypes = 0;                            /* event type */
 
    public:
     /* get gate control list */
-    std::shared_ptr<GateControlList> getGCL() {
+    std::shared_ptr<TimeAwareShaper> getGCL() {
         return this->m_gcl;
     }
 

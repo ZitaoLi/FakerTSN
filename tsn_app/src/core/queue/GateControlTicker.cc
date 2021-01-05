@@ -11,9 +11,9 @@ GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval&
 
 GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire) : Ticker(start, expire), m_gcl(nullptr) {}
 
-GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period, GateControlList* gcl) : Ticker(start, expire, period), m_gcl(gcl) {}
+GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, Time::TimeInterval& period, TimeAwareShaper* gcl) : Ticker(start, expire, period), m_gcl(gcl) {}
 
-GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, GateControlList* gcl) : Ticker(start, expire), m_gcl(gcl) {}
+GateControlTicker::GateControlTicker(Time::TimePoint& start, Time::TimeInterval& expire, TimeAwareShaper* gcl) : Ticker(start, expire), m_gcl(gcl) {}
 
 void GateControlTicker::operator()() {
     INFO("oncall GateControlTicker");
@@ -45,9 +45,9 @@ void GateControlTicker::operator()() {
         // TODO record
     }
     // next ideal interval
-    GateControlListItem item = this->m_gcl->getCurrentItem();
+    GateControlListItem* item = this->m_gcl->getCurrentItem();
     Time::TimePoint nextStartTime(0, 0);
-    Time::TimeInterval interval2 = item.m_timeInterval - deviation;
+    Time::TimeInterval interval2 = item->m_timeInterval - deviation;
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] interval2 " + interval2.toString());
     Ticker* ticker = new GateControlTicker(
         nextStartTime,

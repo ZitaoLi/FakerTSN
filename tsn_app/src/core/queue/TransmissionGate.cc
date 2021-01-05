@@ -10,7 +10,7 @@ IFrameBody* TransmissionGate::dequeue() {
     return nullptr;
 }
 
-void TransmissionGate::registerGCL(std::shared_ptr<GateControlList> gcl) {
+void TransmissionGate::registerGCL(std::shared_ptr<TimeAwareShaper> gcl) {
     gcl->appendGate(shared_from_this());
 }
 

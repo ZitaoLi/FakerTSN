@@ -21,12 +21,14 @@ using namespace tinyxml2;
 
 namespace faker_tsn {
 
+class TransmissionGate;
+
 class GateControlListItem {
    public:
     Time::TimeInterval m_timeInterval; /* time interval */
     std::bitset<8> m_gateStates;       /* gate states */
 
-    GateControlListItem(Time::TimeInterval timeInterval, std::bitset<8> gateStates = std::bitset<8>("00000000")) : m_timeInterval(timeInterval), m_gateStates(gateStates) {}
+    GateControlListItem(Time::TimeInterval timeInterval, std::bitset<8> gateStates ) : m_timeInterval(timeInterval), m_gateStates(std::bitset<8>("00000000")) {}
 
     std::string toString() {
         std::stringstream ss;
@@ -36,45 +38,55 @@ class GateControlListItem {
     }
 };
 
-class TransmissionGate;
+class TimeAwareShaper {
+public:
+    virtual ~TimeAwareShaper() = default;
+    virtual std::string toString() = 0;
+    /* get port index */
+    virtual unsigned int getPortId() = 0;
+    /* port use this function to register timer */
+    virtual void registerGCLfromSchedules() = 0;
+    /* get current gate control list item */
+    virtual GateControlListItem* getCurrentItem() = 0;
+    /*** Obeserver Pattern ***/
+    virtual void appendGate(std::shared_ptr<TransmissionGate> gate) = 0;
+    virtual void updateGates() = 0;
+};
 
-class GateControlList : public REFLECT_OBJECT, public DynamicCreator<GateControlList, unsigned int> {
+class GateControlList : 
+    public TimeAwareShaper, 
+    public REFLECT_OBJECT, 
+    public DynamicCreator<GateControlList, unsigned int> {
    private:
     unsigned int m_length;                                  /* length of CGL */
     unsigned int m_cursor;                                  /* pointer of current item */
     unsigned int m_portId;
     unsigned int m_gateSize;                                /* no. of gates */
     std::vector<std::shared_ptr<TransmissionGate>> m_gates; /* gate container */
-    std::vector<GateControlListItem> m_gcl;                 /* gate control list (GCL) */
+    std::vector<GateControlListItem*> m_gcl;                /* gate control list (GCL) */
     Time::TimeInterval m_period;                            /* scheduling period */
 
     /* load GCL XML file */
-    virtual void loadScheduleXML(std::string filename);
+    void loadScheduleXML(std::string filename);
 
    public:
     GateControlList(unsigned int portId);
 
     virtual ~GateControlList() = default;
 
-    void registerGCLfromSchedules();
+    virtual std::string toString() override;
 
-    /* get port index */
-    inline unsigned int getPortId() {
+    virtual void registerGCLfromSchedules() override;
+
+    virtual unsigned int getPortId() override {
         return this->m_portId;
     }
 
-    /* get current item */
-    GateControlListItem getCurrentItem();
+    virtual GateControlListItem* getCurrentItem() override;
 
-    std::string toString();
+    virtual void appendGate(std::shared_ptr<TransmissionGate> gate) override;
 
-    /*** Obeserver Pattern ***/
-
-    /* append gate */
-    void appendGate(std::shared_ptr<TransmissionGate> gate);
-
-    /* update all gates */
-    void updateGates();
+    virtual void updateGates() override;
 };
 
 }  // namespace faker_tsn
