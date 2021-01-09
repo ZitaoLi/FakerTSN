@@ -11,38 +11,20 @@
 namespace faker_tsn {
 
 class IFrameBody {
-   protected:
-    RELAY_ENTITY m_type;
-    unsigned char m_data[ETH_DATA_LEN];
-    unsigned int m_bytes;
-
    public:
     virtual ~IFrameBody() = default;
 
-    void setData(unsigned char* data, unsigned int len) {
-        memcpy(this->m_data, data, len);
-        this->m_bytes = len;
-    }
+    virtual void setData(unsigned char* data, unsigned int len) = 0;
 
-    void* getData(unsigned char* buf, unsigned int len) {
-        memcpy(buf, this->m_data, len);
-    }
+    virtual void* getData(unsigned char* buf, unsigned int len) = 0;
 
-    unsigned int getBytes() {
-        return this->m_bytes;
-    }
+    virtual unsigned int getBytes() = 0;
 
-    virtual std::string toString() {
-        return "IFrameBody";
-    }
+    virtual std::string toString() = 0;
 
-    void setType(RELAY_ENTITY type) {
-        this->m_type = type;
-    }
+    virtual void setType(RELAY_ENTITY type) = 0;
 
-    RELAY_ENTITY getType() {
-        return this->m_type;
-    }
+    virtual RELAY_ENTITY getType() = 0;
 };
 
 }  // namespace faker_tsn

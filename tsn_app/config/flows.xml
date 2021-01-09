@@ -10,11 +10,11 @@
 			<duration>1000000</duration>
 			<period>2000000</period>
 			<pcp>7</pcp>
-			<dest>01:00:00:00:00:04</dest>
+			<dest>00:00:00:00:00:03</dest>
 			<group>01-00-5E-00-00-01</group>
 			<!-- byte -->
 			<!-- maximum = 1490B -->
-			<size>8000</size>
+			<size>1500</size>
 			<uniqueID>1</uniqueID>
 		</entry>
 	</host>

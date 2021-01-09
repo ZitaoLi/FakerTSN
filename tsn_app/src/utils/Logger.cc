@@ -29,9 +29,11 @@ Logger::~Logger()
 }
 
 void Logger::setLogger(uint8_t level, std::string path, std::string mode) {
+    os.close();
     this->m_level = level;
     this->m_path = path;
     this->m_mode = mode;
+    this->os.open(this->m_path, std::ios::out | std::ios::trunc);
 }
 
 void Logger::log(uint8_t level, const char* message, const char* filename, int line)
@@ -41,6 +43,7 @@ void Logger::log(uint8_t level, const char* message, const char* filename, int l
         if (this->m_mode == "file") {
             this->os << this->prompts[this->m_level] << filename << ":" << line << ": " << message << "\n";
         } else {
+            this->os << this->prompts[this->m_level] << filename << ":" << line << ": " << message << "\n";
             std::cout << this->prompts[this->m_level] << filename << ":" << line << ": " << message << "\n";
         }
         return;

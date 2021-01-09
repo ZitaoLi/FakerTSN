@@ -75,25 +75,25 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     memcpy(srcMac, recvbuf + 6, ETH_ALEN);
     IFrameBody* frame;
     RELAY_ENTITY type;
-    size_t len;
+    size_t len = ETH_DATA_LEN; // TODO
     __be16 tci;
     memcpy(&tci, recvbuf + 14, 2);
     VlanTCI vlan_tci = VlanTCI::parse(tci);
     __be16 seq;
     memcpy(&seq, recvbuf + 20, 2);
     if (!this->m_isEnhanced) {
-        type = RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME;
         frame = new TSNFrameBody();
         TSNFrameBody* _f = dynamic_cast<TSNFrameBody*>(frame);
-        len = sizeof(_f);
+        type = RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME;
+        _f->setType(type);
         _f->setPCP(vlan_tci.pcp);
         _f->setVID(vlan_tci.vid);
         _f->setSeq(ntohs(seq));
+        _f->setData(recvbuf + 24, len);
     } else {
-        type = RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME_E;
         frame = new EnhancementTSNFrameBody();
         EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frame);
-        len = sizeof(_f);
+        type = RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME_E;
         _f->setPCP(vlan_tci.pcp);
         _f->setVID(vlan_tci.vid);
         _f->setSeq(ntohs(seq));
@@ -102,9 +102,9 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
         RTCI r_tci = RTCI::parse(tci);
         _f->setFlowId(r_tci.fid);
         _f->setPhse(r_tci.phs);
+        _f->setType(type);
+        _f->setData(recvbuf + 24, len);
     }
-    frame->setType(type);
-    frame->setData(recvbuf + 24, strlen((char*)recvbuf + 24));
 
     if (this->m_isSwitch) {
         /* forward frames */

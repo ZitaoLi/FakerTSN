@@ -48,6 +48,10 @@ class InnerBuffer {
         return this->m_pcp;
     }
 
+    inline unsigned short getPortIndex() {
+        return this->m_portIndex;
+    }
+
     inline bool isEmpty() {
         return this->m_buffer.empty();
     }

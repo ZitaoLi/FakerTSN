@@ -28,10 +28,14 @@ std::vector<std::shared_ptr<IQueue>> QueueContext::getQueues() {
 void QueueContext::enqueue(IFrameBody* frame) {
     INFO("[" + std::to_string(this->m_portIndex) + "] Enqueue");
 
-    if (frame->getType() == IEEE_802_1Q_TSN_FRAME || frame->getType() == IEEE_802_1Q_TSN_FRAME_E) {  // TSN frame or enhanced TSN frame
+    if (frame->getType() == IEEE_802_1Q_TSN_FRAME) {
         TSNFrameBody* tsnFrame = dynamic_cast<TSNFrameBody*>(frame);
         uint8_t pcp = static_cast<uint8_t>(tsnFrame->getPCP());
         this->m_queues[pcp]->enqueue(tsnFrame);
+    } else if (frame->getType() == IEEE_802_1Q_TSN_FRAME_E) {
+        EnhancementTSNFrameBody* enhancedTsnFrame = dynamic_cast<EnhancementTSNFrameBody*>(frame);
+        uint8_t pcp = static_cast<uint8_t>(enhancedTsnFrame->getPCP());
+        this->m_queues[pcp]->enqueue(enhancedTsnFrame);
     } else if (frame->getType() == IEEE_802_1Q_FRAME) {  // IEEE 802.1Q frame
         // TODO
         INFO("normal frame");

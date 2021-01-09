@@ -8,7 +8,8 @@
 #include "../../utils/reflector/DynamicCreate.h"
 #include "IQueue.h"
 #include "InnerBuffer.h"
-#include "TransmissionSelectionAlgorithm.h"
+#include "PriorityStrictTransmissionSelectionAlgorithm.h"
+#include "ErrorToleranceTransmissionSelectionAlgorithm.h"
 #include "IEEE8021Queue.h"
 #include "TransmissionGate.h"
 

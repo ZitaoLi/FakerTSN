@@ -23,7 +23,7 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     INFO("SendTSNFrameEventHandler on call");
 
     /* try to get frame from queue */
-    TSNFrameBody* frameBody = (TSNFrameBody*)this->m_port->output();
+    IFrameBody* frameBody = (TSNFrameBody*)this->m_port->output();
     if (frameBody == nullptr) {
         // disable EPOLLOUT event
         Reactor::getInstance().getDemultoplexer().updateHandle(this->m_handle, 0x00);
@@ -57,36 +57,74 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     INFO("src mac = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&eth_hdr.h_source), 6));
     INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&eth_hdr.h_proto), 2));
 
-    /* construct VLAN-tag */
-    VlanTCI vlan_tci;
-    vlan_tci.pcp = frameBody->getPCP();
-    vlan_tci.vid = frameBody->getVID();
-    __be16 tci = VlanTCI::encode(vlan_tci);
+    __be16 tci;
+    __be16 rsv;
+    __be16 seq;
     struct vlan_hdr vlan_tag;
     memset(&vlan_tag, 0x00, sizeof(vlan_tag));
-    memcpy(&vlan_tag.h_vlan_TCI, &tci, sizeof(tci));        // set TCI
-    // vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
-    vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_TSN);  // set IEEE 1722 protocol
-    INFO("TCI = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_TCI), 2));
-    INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_encapsulated_proto), 2));
-
-    /* construct R-tag */
     struct rtag_hdr rtag;
-    __be16 seq = frameBody->getSeq();
     memset(&rtag, 0x00, sizeof(rtag));
-    rtag.h_rtag_seq_num = htons(seq);  // set
-    rtag.h_rtag_encapsulated_proto = htons(ETH_P_IP);
-    if (this->m_isEnhanced) {
-        RTCI r_tci;
+    if (!this->m_isEnhanced) {
+        TSNFrameBody* _f = dynamic_cast<TSNFrameBody*>(frameBody);
+        VlanTCI vlan_tci;
+        vlan_tci.pcp = _f->getPCP();
+        vlan_tci.vid = _f->getVID();
+        tci = VlanTCI::encode(vlan_tci);
+        seq = _f->getSeq();
+    } else {
         EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frameBody);
+        VlanTCI vlan_tci;
+        vlan_tci.pcp = _f->getPCP();
+        vlan_tci.vid = _f->getVID();
+        tci = VlanTCI::encode(vlan_tci);
+        seq = _f->getSeq();
+        RTCI r_tci;
         r_tci.fid = _f->getFlowId();
         r_tci.phs = _f->getPhase();
-        __be16 rsv = RTCI::encode(r_tci);
-        rtag.h_rtag_rsved = rsv;
-    }  
+        rsv = RTCI::encode(r_tci);
+    }
+    memcpy(&vlan_tag.h_vlan_TCI, &tci, sizeof(tci));        // set TCI
+    vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_TSN);  // set IEEE 1722 protocol
+    rtag.h_rtag_rsved = rsv;                                // set reserved
+    rtag.h_rtag_seq_num = htons(seq);                       // set seq
+    rtag.h_rtag_encapsulated_proto = htons(ETH_P_IP);       // set IP Protocol 
+
+    INFO("TCI = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_TCI), 2));
+    INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_encapsulated_proto), 2));
     INFO("reserved = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_rsved), 2));
     INFO("sequence number = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_seq_num), 2));
     INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_encapsulated_proto), 2));
+
+    /* construct VLAN-tag */
+    // VlanTCI vlan_tci;
+    // vlan_tci.pcp = frameBody->getPCP();
+    // vlan_tci.vid = frameBody->getVID();
+    // __be16 tci = VlanTCI::encode(vlan_tci);
+    // struct vlan_hdr vlan_tag;
+    // memset(&vlan_tag, 0x00, sizeof(vlan_tag));
+    // memcpy(&vlan_tag.h_vlan_TCI, &tci, sizeof(tci));        // set TCI
+    // // vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_ALL);  // set IEEE 1722 protocol
+    // vlan_tag.h_vlan_encapsulated_proto = htons(ETH_P_TSN);  // set IEEE 1722 protocol
+    // INFO("TCI = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_TCI), 2));
+    // INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&vlan_tag.h_vlan_encapsulated_proto), 2));
+
+    /* construct R-tag */
+    // struct rtag_hdr rtag;
+    // __be16 seq = frameBody->getSeq();
+    // memset(&rtag, 0x00, sizeof(rtag));
+    // rtag.h_rtag_seq_num = htons(seq);  // set
+    // rtag.h_rtag_encapsulated_proto = htons(ETH_P_IP);
+    // if (this->m_isEnhanced) {
+    //     RTCI r_tci;
+    //     EnhancementTSNFrameBody* _f = dynamic_cast<EnhancementTSNFrameBody*>(frameBody);
+    //     r_tci.fid = _f->getFlowId();
+    //     r_tci.phs = _f->getPhase();
+    //     __be16 rsv = RTCI::encode(r_tci);
+    //     rtag.h_rtag_rsved = rsv;
+    // }  
+    // INFO("reserved = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_rsved), 2));
+    // INFO("sequence number = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_seq_num), 2));
+    // INFO("protocol = " + ConvertUtils::converBinToHexString(reinterpret_cast<unsigned char*>(&rtag.h_rtag_encapsulated_proto), 2));
 
     /* construct TSN frame */
     union tsn_frame frame;

@@ -27,6 +27,7 @@ void StartTicker::operator()() {
     auto ports = TSNContext::getInstance().getPortManager()->getPorts();
     for (auto port: ports) {
         port->setTimer();
+        Reactor::getInstance().getDemultoplexer().updateHandle(port->getOutSockfd(), EPOLLOUT);
     }
 
     /* start timer */

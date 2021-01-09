@@ -8,7 +8,8 @@ namespace faker_tsn
 EnhancedGateControlList::EnhancedGateControlList(unsigned int portId) : 
     m_portId(portId), 
     m_length(0), 
-    m_cursor(0), 
+    m_currentCursor(0), 
+    m_nextCursor(0),
     m_gateSize(0) {
     /* load config file */
     INFO("[" + std::to_string(this->m_portId) + "] load gcl.xml");
@@ -21,13 +22,10 @@ EnhancedGateControlList::~EnhancedGateControlList() {
 
 std::string EnhancedGateControlList::toString() {
     std::stringstream ss;
-    for (int i = 0; i < this->m_gateSize; i++) {
-        if (this->m_gates[i]->isOpen()) {
-            ss << "1";
-        } else {
-            ss << "0";
-        }
-    }
+    ss << "length[" << std::to_string(this->m_length) << "] ";
+    ss << "period[" << this->m_period.toString() << "] ";
+    ss << "cursor(current)[" << std::to_string(this->m_currentCursor) << "] ";
+    ss << "cursor(next)[" << std::to_string(this->m_nextCursor) << "] ";
     return ss.str();
 }
 
@@ -58,16 +56,17 @@ void EnhancedGateControlList::loadScheduleXML(std::string filename) {
         std::bitset<8> bitvector(std::string(entry->FirstChildElement("bitvector")->GetText()));
         unsigned int uniqueId = atoi(entry->FirstChildElement("uniqueID")->GetText());
         unsigned int phase = atoi(entry->FirstChildElement("phase")->GetText());
-        INFO("interval:\t" + std::to_string(length) + 
-            "\tstates:\t" + bitvector.to_string() + 
-            "\tuniqueId:\t" + std::to_string(uniqueId) + 
-            "\tphase\t" + std::to_string(phase));
+        INFO("interval:" + std::to_string(length) + 
+            "\tstates:" + bitvector.to_string() + 
+            "\tuniqueId:" + std::to_string(uniqueId) + 
+            "\tphase" + std::to_string(phase));
         EnhancedGateControlListItem* item = new EnhancedGateControlListItem(
             Time::converIntegerToTimeInterval(length, timeUnit), 
             bitvector,
             uniqueId,
             phase);
         this->m_gcl.emplace_back(item);
+        INFO(item->toString());
         entry = entry->NextSiblingElement();
         this->m_length++;
     }
@@ -78,7 +77,7 @@ void EnhancedGateControlList::registerGCLfromSchedules() {
     INFO("[" + std::to_string(this->m_portId) + "] register ticker to timer");
     if (this->m_gcl.size() != 0) {
         Time::TimePoint startTime(0, 0);
-        EnhancedGateControlListItem* item = this->m_gcl[this->m_cursor];
+        EnhancedGateControlListItem* item = this->m_gcl[this->m_nextCursor];
         INFO("[" + std::to_string(this->m_portId) + "] " + item->toString());
         Ticker* ticker = new GateControlTicker(
             startTime,
@@ -88,8 +87,16 @@ void EnhancedGateControlList::registerGCLfromSchedules() {
     }
 }
 
+GateControlListItem* EnhancedGateControlList::getItem(unsigned int index) {
+    return this->m_gcl[index];
+}
+
 GateControlListItem* EnhancedGateControlList::getCurrentItem() {
-    return this->m_gcl[this->m_cursor];
+    return this->m_gcl[this->m_currentCursor];
+}
+
+GateControlListItem* EnhancedGateControlList::getNextItem() {
+    return this->m_gcl[this->m_nextCursor];
 }
 
 void EnhancedGateControlList::appendGate(std::shared_ptr<TransmissionGate> gate) {
@@ -100,8 +107,8 @@ void EnhancedGateControlList::appendGate(std::shared_ptr<TransmissionGate> gate)
 
 void EnhancedGateControlList::updateGates() {
     INFO("[" + std::to_string(this->m_portId) + "] update gates");
-    INFO("[" + std::to_string(this->m_portId) + "] -> " + this->m_gcl[this->m_cursor]->toString());
-    auto item = this->m_gcl[this->m_cursor];
+    INFO("[" + std::to_string(this->m_portId) + "] -> " + this->m_gcl[this->m_nextCursor]->toString());
+    auto item = this->m_gcl[this->m_nextCursor];
     for (int i = this->m_gateSize - 1; i >= 0 ; i--) {
         if (item->m_gateStates.test(i)) {
             INFO("[" + std::to_string(this->m_portId) + "] gate [" + std::to_string(this->m_gates[i]->getPCP()) + "] -> 1");
@@ -111,7 +118,9 @@ void EnhancedGateControlList::updateGates() {
             this->m_gates[i]->onUpdate(i, false); // close gate
         }
     }
-    this->m_cursor = (this->m_cursor + 1) % this->m_length; // move to next item
+    INFO("[" + std::to_string(this->m_portId) + "] cursor [" + std::to_string(this->m_currentCursor) + " -> [" + std::to_string(this->m_nextCursor) + "]");
+    this->m_currentCursor = this->m_nextCursor;
+    this->m_nextCursor = (this->m_currentCursor + 1) % this->m_length; // move to next item
 }
     
 } // namespace faker_tsn

@@ -76,9 +76,19 @@ void GateControlList::registerGCLfromSchedules() {
     }
 }
 
+/* get item by index */
+GateControlListItem* GateControlList::getItem(unsigned int index) {
+    return this->m_gcl[index];
+}
+
 /* get current item */
 GateControlListItem* GateControlList::getCurrentItem() {
     return this->m_gcl[this->m_cursor];
+}
+
+/* get next item */
+GateControlListItem* GateControlList::getNextItem() {
+    return nullptr;
 }
 
 /* append gate */

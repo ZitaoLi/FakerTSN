@@ -50,26 +50,33 @@ IFrameBody* InnerBuffer::dequeue() {
 
 IFrameBody* InnerBuffer::dequeue(uint32_t index) {
     INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + ".innerBuffer dequeue");
-    if (this->m_buffer.size() == 0)
-        return nullptr;
     IFrameBody* frameBody = this->getBy(index);
+    if (frameBody != nullptr)
+        return nullptr;
     this->removeBy(index);
-    this->m_residualCapacity += frameBody->getBytes();
-    this->m_usedCapacity -= frameBody->getBytes();
+
     return frameBody;
 }
 
 IFrameBody* InnerBuffer::getBy(uint32_t index) {
-    if (this->m_buffer.size() == 0)
+    if (this->m_buffer.size() <= index)
         return nullptr;
     IFrameBody* frameBody = this->m_buffer.at(index);
     return frameBody;
 }
 
 void InnerBuffer::removeBy(uint32_t index) {
-    if (this->m_buffer.size() == 0)
+    if (this->m_buffer.size() <= index)
         return;
+    IFrameBody* frameBody = this->m_buffer.at(index);
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + " remove frame: " + frameBody->toString());
+    
+    this->m_residualCapacity += frameBody->getBytes();
+    this->m_usedCapacity -= frameBody->getBytes();
     this->m_buffer.erase(this->m_buffer.begin() + index);
+
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + ".innerBuffer.capacity(used): " + std::to_string(this->m_usedCapacity));
+    INFO(this->m_deviceName + ".port" + std::to_string(this->m_portIndex) + ".queue" + std::to_string(this->m_pcp) + ".innerBuffer.capacity(residual): " + std::to_string(this->m_residualCapacity));
 }
 
 }  // namespace faker_tsn

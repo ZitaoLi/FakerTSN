@@ -8,6 +8,7 @@
 #include "../../networking/frame/EnhancementTSNFrameBody.h"
 #include "../../networking/frame/IFrameBody.h"
 #include "../../networking/frame/TSNFrameBody.h"
+#include "../../networking/frame/EnhancementTSNFrameBody.h"
 #include "../../utils/Log.h"
 #include "../../utils/config/ConfigSetting.h"
 #include "IEEE8021Queue.h"

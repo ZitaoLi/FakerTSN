@@ -28,7 +28,7 @@ class GateControlListItem {
     Time::TimeInterval m_timeInterval; /* time interval */
     std::bitset<8> m_gateStates;       /* gate states */
 
-    GateControlListItem(Time::TimeInterval timeInterval, std::bitset<8> gateStates ) : m_timeInterval(timeInterval), m_gateStates(std::bitset<8>("00000000")) {}
+    GateControlListItem(Time::TimeInterval timeInterval, std::bitset<8> gateStates ) : m_timeInterval(timeInterval), m_gateStates(gateStates) {}
 
     std::string toString() {
         std::stringstream ss;
@@ -46,8 +46,12 @@ public:
     virtual unsigned int getPortId() = 0;
     /* port use this function to register timer */
     virtual void registerGCLfromSchedules() = 0;
+    /* get gate control list item */
+    virtual GateControlListItem* getItem(unsigned int) = 0;
     /* get current gate control list item */
     virtual GateControlListItem* getCurrentItem() = 0;
+    /* get current gate control list item */
+    virtual GateControlListItem* getNextItem() = 0;
     /*** Obeserver Pattern ***/
     virtual void appendGate(std::shared_ptr<TransmissionGate> gate) = 0;
     virtual void updateGates() = 0;
@@ -82,7 +86,11 @@ class GateControlList :
         return this->m_portId;
     }
 
+    virtual GateControlListItem* getItem(unsigned int) override;
+
     virtual GateControlListItem* getCurrentItem() override;
+
+    virtual GateControlListItem* getNextItem() override;
 
     virtual void appendGate(std::shared_ptr<TransmissionGate> gate) override;
 

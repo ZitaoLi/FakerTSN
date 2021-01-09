@@ -6,11 +6,16 @@
 
 namespace faker_tsn {
 
-class PriorityStrictTransmissionSelectionAlgorithm : public TransmissionSelectionAlgorithm, public REFLECT_OBJECT, public DynamicCreator<PriorityStrictTransmissionSelectionAlgorithm, std::shared_ptr<InnerBuffer>> {
+class PriorityStrictTransmissionSelectionAlgorithm : 
+    public TransmissionSelectionAlgorithm, 
+    public REFLECT_OBJECT, 
+    public DynamicCreator<PriorityStrictTransmissionSelectionAlgorithm, std::shared_ptr<InnerBuffer>> {
    public:
-    PriorityStrictTransmissionSelectionAlgorithm(std::shared_ptr<InnerBuffer> innerBuffer) : TransmissionSelectionAlgorithm(innerBuffer) {}
+    PriorityStrictTransmissionSelectionAlgorithm(std::shared_ptr<InnerBuffer> innerBuffer);
 
-    ~PriorityStrictTransmissionSelectionAlgorithm();
+    virtual ~PriorityStrictTransmissionSelectionAlgorithm() override;
+
+    virtual IFrameBody* dequeue() override;
 };
 
 }  // namespace faker_tsn

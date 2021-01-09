@@ -38,6 +38,9 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
         return this->m_gcl;
     }
 
+    /* get queue context */
+    std::shared_ptr<QueueContext> getQueueContext();
+
    public:
     /* no. of port */
     static uint8_t s_portNum;
@@ -111,9 +114,6 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
         ss << "]";
         return ss.str();
     }
-
-    /* get queue context */
-    std::shared_ptr<QueueContext> getQueueContext();
 };
 
 }  // namespace faker_tsn

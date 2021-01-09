@@ -2,6 +2,7 @@
 #define _UP_PORT_STATE
 
 #include "IPortState.h"
+#include "../../networking/Reactor.h"
 
 namespace faker_tsn
 {

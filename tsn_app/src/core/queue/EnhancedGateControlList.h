@@ -45,7 +45,8 @@ class EnhancedGateControlList :
     public DynamicCreator<EnhancedGateControlList, unsigned int> {
 private:
     unsigned int m_length;
-    unsigned int m_cursor;
+    unsigned int m_currentCursor;
+    unsigned int m_nextCursor;
     unsigned int m_portId;
     unsigned int m_gateSize;
     Time::TimeInterval m_period;
@@ -60,6 +61,18 @@ public:
 
     ~EnhancedGateControlList();
 
+    unsigned int getCurrentIndex() {
+        return this->m_currentCursor;
+    }
+
+    unsigned int getNextIndex() {
+        return this->m_nextCursor;
+    }
+
+    unsigned int getGCLSize() {
+        return this->m_length;
+    }
+
     virtual std::string toString() override;
 
     virtual void registerGCLfromSchedules() override;
@@ -68,7 +81,11 @@ public:
         return this->m_portId;
     }
 
+    virtual GateControlListItem* getItem(unsigned int) override;
+
     virtual GateControlListItem* getCurrentItem() override;
+
+    virtual GateControlListItem* getNextItem() override;
 
     virtual void appendGate(std::shared_ptr<TransmissionGate> gate) override;
 

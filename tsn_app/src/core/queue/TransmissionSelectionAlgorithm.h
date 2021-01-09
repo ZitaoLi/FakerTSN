@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include "../../networking/frame/IFrameBody.h"
 #include "InnerBuffer.h"
 
@@ -22,6 +23,13 @@ class TransmissionSelectionAlgorithm {
     }
 
     virtual IFrameBody* dequeue();
+
+    std::string toString() {
+        std::stringstream ss;
+        ss << "[" << std::to_string(this->m_innerBuffer->getPortIndex()) << "]";
+        ss << "[" << std::to_string(this->m_innerBuffer->getPCP()) << "]";
+        return ss.str();
+    }
 };
 
 }  // namespace faker_tsn

@@ -16,7 +16,14 @@ IEEE8021QbvQueue::IEEE8021QbvQueue(unsigned short portIndex, uint8_t pcp) : m_po
 
     /* initialize transimssion selection algorithm */
     std::string transmissionSelectionAlgorithmClass = cs.get<std::string>("switch.queue.transmissionSelectionAlgorithm");
-    this->m_transmissionSelectionAlgorithm = std::make_shared<TransmissionSelectionAlgorithm>(this->m_innerBuffer);
+    if (transmissionSelectionAlgorithmClass == "PriorityStrictTransmissionSelectionAlgorithm") {
+        this->m_transmissionSelectionAlgorithm = std::make_shared<PriorityStrictTransmissionSelectionAlgorithm>(this->m_innerBuffer);
+    } else if (transmissionSelectionAlgorithmClass == "ErrorToleranceTransmissionSelectionAlgorithm") {
+        this->m_transmissionSelectionAlgorithm = std::make_shared<ErrorToleranceTransmissionSelectionAlgorithm>(this->m_innerBuffer);
+    } else {
+        ERROR("invalid transmissionSelectionAlgorithmClass");
+        exit(EXIT_FAILURE);
+    }
 
     /* initialize transmission gate */
     this->m_transmissionGate = std::make_shared<TransmissionGate>(this->getTransmissionSelectionAlgorithm());

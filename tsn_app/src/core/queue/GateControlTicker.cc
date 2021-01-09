@@ -45,7 +45,7 @@ void GateControlTicker::operator()() {
         // TODO record
     }
     // next ideal interval
-    GateControlListItem* item = this->m_gcl->getCurrentItem();
+    GateControlListItem* item = this->m_gcl->getNextItem();
     Time::TimePoint nextStartTime(0, 0);
     Time::TimeInterval interval2 = item->m_timeInterval - deviation;
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] interval2 " + interval2.toString());
