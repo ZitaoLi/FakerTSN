@@ -2,6 +2,7 @@
 
 #include "../timer/ITimer.h"
 #include "../core/port/StartTicker.h"
+#include "../core/port/StopTicker.h"
 #include "../timer/TimeContext.h"
 
 namespace faker_tsn
@@ -57,9 +58,14 @@ void ControlEventHandler::handle_event(EVENT_TYPE eventType)
         std::string runTime = keys[2]; // seconds
         Time::TimePoint start(std::stoi(keys[1]), 0);
         Time::TimeInterval interval(0, 0);
-        Ticker* ticker = new StartTicker(start, interval);
-        TimeContext::getInstance().getTimer()->addTicker(ticker);
-        TimeContext::getInstance().getTimer()->start();
+        Time::TimeInterval runInterval(std::stoi(keys[2]), 0);
+        Time::TimePoint stop = start + runInterval;
+        Ticker* startTicker = new StartTicker(start, interval);
+        Ticker* stopTicker = new StopTicker(stop, interval);
+        auto timer = TimeContext::getInstance().getTimer();
+        timer->addTicker(startTicker);
+        timer->addTicker(stopTicker);
+        timer->start();
     } else if (keys[0] == "stop") {
 
     } else {
