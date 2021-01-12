@@ -9,6 +9,8 @@ uint8_t DataPort::s_portNum = 0;
 
 DataPort::DataPort(const char* deviceName) : m_deviceID(DataPort::s_portNum++), m_deviceName(deviceName) {
     INFO("Construct Port[" + std::to_string(s_portNum) + "|" + std::string(this->m_deviceName) + "] created");
+    this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
+    this->m_baseRecoveryFunction = BaseRecoveryFunction(s_portNum);
 }
 
 DataPort::~DataPort() {
@@ -212,6 +214,15 @@ void DataPort::sendTest() {
 }
 
 void DataPort::input(void* data, size_t len, RELAY_ENTITY type) {
+    /* frame elimination */
+    if (m_isEnhanced && (type == IEEE_802_1Q_TSN_FRAME || type == IEEE_802_1Q_TSN_FRAME_E)) {
+        IFrameBody* frame = reinterpret_cast<IFrameBody*>(data);
+        if (this->m_baseRecoveryFunction.handle(frame) == nullptr) {
+            return;
+        }
+    }
+
+    /* enqueue */
     if (type == IEEE_802_1Q_TSN_FRAME) {
         INFO("Input TSN frame");
         TSNFrameBody* frame = reinterpret_cast<TSNFrameBody*>(data);
@@ -220,6 +231,8 @@ void DataPort::input(void* data, size_t len, RELAY_ENTITY type) {
         INFO("Input enhanced-TSN frame");
         EnhancementTSNFrameBody* frame = reinterpret_cast<EnhancementTSNFrameBody*>(data);
         this->m_queueContext->enqueue(frame);
+    } else {
+        ERROR("not support non-tsn frame");
     }
 }
 

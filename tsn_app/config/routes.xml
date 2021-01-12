@@ -30,7 +30,7 @@
   <filteringDatabase id="host3">
     <static>
       <ports>
-        <port id="0" name="h3-eth0" peerMacAddress="16-e8-89-ef-d6-c0" macAddress="00-00-00-00-00-03"/>
+        <port id="0" name="h3-eth0" peerMacAddress="16-e8-89-ef-d6-c0" macAddress="00-00-00-00-00-05"/>
       </ports>
       <forward>
         <individualAddress port="0" macAddress="00-00-00-00-00-03"/>
@@ -38,7 +38,8 @@
       </forward>
     </static>
   </filteringDatabase>
-  <filteringDatabase id="switch1">
+
+  <filteringDatabase id="switch2">
     <static>
       <ports>
         <port id="0" name="s2-eth0" peerMacAddress="00-00-00-00-00-01"/>
@@ -48,7 +49,35 @@
       <forward>
         <individualAddress port="1" macAddress="00-00-00-00-00-01"/>
         <multicastAddress ports="1 2" macAddress="01-00-5E-00-00-01"/>
-        <individualAddress port="2" macAddress="00-00-00-00-00-0C"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="switch3">
+    <static>
+      <ports>
+        <port id="0" name="s3-eth0" peerMacAddress="d6:3d:fc:0d:8a:8d"/>
+        <port id="1" name="s3-eth1" peerMacAddress="f6:94:58:9d:b4:4a"/>
+        <port id="2" name="s3-eth2" peerMacAddress="00-00-00-00-00-05"/>
+        <port id="3" name="s3-eth3" peerMacAddress="00-00-00-00-00-06"/>
+      </ports>
+      <forward>
+        <individualAddress port="2" macAddress="d6:3d:fc:0d:8a:8d"/>
+        <individualAddress port="2" macAddress="f6:94:58:9d:b4:4a"/>
+        <multicastAddress ports="2 3" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="switch4">
+    <static>
+      <ports>
+        <port id="0" name="s4-eth0" peerMacAddress="fe:18:c8:be:3e:ba"/>
+        <port id="1" name="s4-eth1" peerMacAddress="fe:52:f2:23:46:c0"/>
+      </ports>
+      <forward>
+        <individualAddress port="1" macAddress="fe:18:c8:be:3e:ba"/>
+        <multicastAddress ports="1" macAddress="01-00-5E-00-00-01"/>
       </forward>
     </static>
   </filteringDatabase>

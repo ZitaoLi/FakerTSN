@@ -33,6 +33,22 @@ class EnhancementTSNFrameBody : public IFrameBody {
         return ss.str();
     }
 
+    virtual IFrameBody* copy() override {
+        EnhancementTSNFrameBody* oldFrame = this;
+        EnhancementTSNFrameBody* newFrame = new EnhancementTSNFrameBody();
+        newFrame->setType(oldFrame->getType());
+        unsigned int len = oldFrame->getBytes();
+        unsigned char* buf = (unsigned char*)malloc(len);
+        oldFrame->getData(buf, len);
+        newFrame->setData(buf, len);
+        newFrame->setPCP(oldFrame->getPCP());
+        newFrame->setSeq(oldFrame->getSeq());
+        newFrame->setVID(oldFrame->getVID());
+        newFrame->setFlowId(oldFrame->getFlowId());
+        newFrame->setPhse(oldFrame->getPhase());
+        return newFrame;
+    }
+
     virtual void setData(unsigned char* data, unsigned int len) override {
         memcpy(this->m_data, data, len);
         this->m_bytes = len;

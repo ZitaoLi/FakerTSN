@@ -187,7 +187,7 @@ void* FlowApp::output() {
         _f->setPCP(flow->pcp);
         _f->setVID(flow->vid);
         _f->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME);
-        _f->setSeq(flow->seq++);
+        _f->setSeq(++flow->seq);
         _f->setData(data, frameSize);
         INFO(this->toString() + " construct frame:" + _f->toString());
     } else {
@@ -196,7 +196,7 @@ void* FlowApp::output() {
         _f->setPCP(flow->pcp);
         _f->setVID(flow->vid);
         _f->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME_E);
-        _f->setSeq(flow->seq++);
+        _f->setSeq(++flow->seq);
         _f->setData(data, frameSize);
         _f->setFlowId(1);
         _f->setPhse(0);

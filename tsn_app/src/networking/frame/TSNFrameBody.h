@@ -34,6 +34,20 @@ class TSNFrameBody : public IFrameBody {
         return ss.str();
     }
 
+    virtual IFrameBody* copy() override {
+        TSNFrameBody* oldFrame = dynamic_cast<TSNFrameBody*>(this);
+        TSNFrameBody* newFrame = new TSNFrameBody();
+        newFrame->setType(oldFrame->getType());
+        unsigned int len = oldFrame->getBytes();
+        unsigned char* buf = (unsigned char*)malloc(len);
+        oldFrame->getData(buf, len);
+        newFrame->setData(buf, len);
+        newFrame->setPCP(oldFrame->getPCP());
+        newFrame->setSeq(oldFrame->getSeq());
+        newFrame->setVID(oldFrame->getVID());
+        return newFrame;
+    }
+
     virtual void setData(unsigned char* data, unsigned int len) override {
         memcpy(this->m_data, data, len);
         this->m_bytes = len;

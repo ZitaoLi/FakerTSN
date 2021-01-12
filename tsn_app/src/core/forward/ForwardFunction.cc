@@ -27,16 +27,18 @@ void ForwardFunction::forward(const unsigned char* srcMac, const unsigned char* 
     };
 
     /* forward frame */
-    auto portManager = TSNContext::getInstance().getPortManager();
-    Selector& demultoplexer = Reactor::getInstance().getDemultoplexer();
+    IFrameBody* frame = reinterpret_cast<IFrameBody*>(data);
     for (unsigned short index : ports) {
-        auto port = portManager->getPort(index);
+        auto port = TSNContext::getInstance().getPortManager()->getPort(index);
         INFO("Forward to " + port->toString());
+        // dup data
+        IFrameBody* dupFrame = frame->copy();
         // send data into target port
-        port->input(data, len, type);
+        port->input(reinterpret_cast<IFrameBody*>(dupFrame), len, type);
         // enable EPOLLOUT event for target port
-        demultoplexer.updateHandle(port->getOutSockfd(), EPOLLOUT);
+        Reactor::getInstance().getDemultoplexer().updateHandle(port->getOutSockfd(), EPOLLOUT);
     }
+    delete(frame);
 }
 
 }  // namespace faker_tsn

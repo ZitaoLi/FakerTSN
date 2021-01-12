@@ -49,8 +49,11 @@ void MacTable::loadRouteXML(std::string filename) {
     while (port) {
         unsigned short portId = atoi(port->Attribute("id"));
         const char* macString = port->Attribute("peerMacAddress");
+        std::string _s(macString);
+        std::transform(_s.begin(), _s.end(), _s.begin(), ::toupper);
+        const char* _cs = _s.c_str();
         unsigned char mac[ETH_ALEN];
-        MacTable::parseMacAddress(macString, mac);
+        MacTable::parseMacAddress(_cs, mac);
         MacTable::addPeer(portId, mac);
         port = port->NextSiblingElement();
     }
@@ -62,10 +65,13 @@ void MacTable::loadRouteXML(std::string filename) {
         if (strcmp(individualAddress->Name(), "individualAddress") == 0) {
             const char* portString = individualAddress->Attribute("port");
             const char* macString = individualAddress->Attribute("macAddress");
+            std::string _s(macString);
+            std::transform(_s.begin(), _s.end(), _s.begin(), ::toupper);
+            const char* _cs = _s.c_str();
             std::vector<unsigned short> portIndexes;
             portIndexes = MacTable::parsePortIndex(portString);
             unsigned char mac[ETH_ALEN];
-            MacTable::parseMacAddress(macString, mac);
+            MacTable::parseMacAddress(_cs, mac);
             MacTable::addItem(mac, portIndexes);
         }
         individualAddress = individualAddress->NextSiblingElement();

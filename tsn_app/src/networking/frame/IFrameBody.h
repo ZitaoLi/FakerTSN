@@ -25,6 +25,8 @@ class IFrameBody {
     virtual void setType(RELAY_ENTITY type) = 0;
 
     virtual RELAY_ENTITY getType() = 0;
+
+    virtual IFrameBody* copy() = 0;
 };
 
 }  // namespace faker_tsn

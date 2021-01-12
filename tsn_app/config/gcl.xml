@@ -3,7 +3,7 @@
 	<!-- us -->
 	<cycle>4000000</cycle> <!-- 4000 ms -->
 	
-	<switch name="switch1">
+	<switch name="switch2">
 		<port id="0">
 			<entry>
 				<!-- us -->
@@ -44,6 +44,66 @@
 				<uniqueID>0</uniqueID>
 				<phase>0</phase>
 			</entry>
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+	</switch>
+
+	<switch name="switch3">
+		<port id="0">
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+		<port id="1">
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+		<port id="2">
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+		<port id="3">
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+	</switch>
+
+	<switch name="switch4">
+		<port id="0">
+			<entry>
+				<!-- us -->
+				<length>2000000</length> <!-- 2000 ms -->
+				<bitvector>10000000</bitvector>
+				<uniqueID>1</uniqueID>
+				<phase>0</phase>
+			</entry>
+		</port>
+		<port id="1">
 			<entry>
 				<!-- us -->
 				<length>2000000</length> <!-- 2000 ms -->

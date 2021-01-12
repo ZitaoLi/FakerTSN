@@ -13,6 +13,7 @@
 #include "../queue/QueueContext.h"
 #include "../queue/IEEE8021Queue.h"
 #include "../queue/IEEE8021QbvQueue.h"
+#include "BaseRecoveryFunction.h"
 #include "IPort.h"
 #include "PortManager.h"
 
@@ -31,6 +32,8 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
     std::shared_ptr<LinkLayerInterface> m_interface; /* link layer interface */
     std::shared_ptr<IPortState> state;               /* port state */
     int m_eventTypes = 0;                            /* event type */
+    bool m_isEnhanced;                               /* enhanced */
+    BaseRecoveryFunction m_baseRecoveryFunction;
 
    public:
     /* get gate control list */
