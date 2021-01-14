@@ -46,6 +46,9 @@ class EnhancementTSNFrameBody : public IFrameBody {
         newFrame->setVID(oldFrame->getVID());
         newFrame->setFlowId(oldFrame->getFlowId());
         newFrame->setPhse(oldFrame->getPhase());
+        unsigned char mac[ETH_ALEN];
+        oldFrame->getMac(mac);
+        newFrame->setMac(mac);
         return newFrame;
     }
 

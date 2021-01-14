@@ -21,7 +21,8 @@ std::string GateControlList::toString() {
 GateControlList::GateControlList(unsigned int portId) : m_portId(portId), m_length(0), m_cursor(0), m_gateSize(0) {
     /* load config file */
     INFO("[" + std::to_string(this->m_portId) + "] load gcl.xml");
-    std::string filename = "./config/gcl.xml";
+    std::string profilePath = ConfigSetting::getInstance().get<std::string>("profile.path");
+    std::string filename = profilePath + "/gcl.xml";
     this->loadScheduleXML(filename);
 }
 

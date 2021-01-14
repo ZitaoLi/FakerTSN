@@ -12,6 +12,8 @@
 
 using namespace faker_tsn;
 
+DataSpot ds;
+
 int main(int argc, char **argv) {
     /* parse parameters */
     std::string filename;

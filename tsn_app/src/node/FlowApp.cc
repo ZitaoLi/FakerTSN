@@ -1,9 +1,12 @@
 #include "FlowApp.h"
 
 #include "FlowTicker.h"
+#include "../utils/monitor/DataSpot.h"
 
 namespace faker_tsn
 {
+
+extern DataSpot ds;
 
 FlowApp::FlowApp(const char* deviceName) : 
     m_deviceName(deviceName), 
@@ -17,7 +20,8 @@ FlowApp::FlowApp(const char* deviceName) :
     this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
     /* load xml */
     INFO(this->toString() +  " load flows.xml");
-    std::string filename = "./config/flows.xml";
+    std::string profilePath = ConfigSetting::getInstance().get<std::string>("profile.path");
+    std::string filename = profilePath + "/flows.xml";
     this->loadScheduleXML(filename);
 }
 
@@ -152,15 +156,16 @@ void FlowApp::registerEventHandler() {
 
 /* input something into port */
 void FlowApp::input(void* data, size_t len, RELAY_ENTITY type) {
-    IFrameBody* frame;
     if (type == IEEE_802_1Q_TSN_FRAME) {
         INFO("Input TSN frame");
-        frame = reinterpret_cast<TSNFrameBody*>(data);
+        TSNFrameBody* frame = reinterpret_cast<TSNFrameBody*>(data);
     } else if (type == IEEE_802_1Q_TSN_FRAME_E) {
         INFO("Input enhanced-TSN frame");
-        frame = reinterpret_cast<EnhancementTSNFrameBody*>(data);
+        EnhancementTSNFrameBody* frame = reinterpret_cast<EnhancementTSNFrameBody*>(data);
+        std::string flowName = "flow" + std::to_string(frame->getFlowId());
+        ds.add<int>(1, {this->m_deviceName, flowName, "recv_num"});
     }
-    INFO(this->toString() + " received frames: " + std::to_string(++this->oframeCount));
+    ds.add<int>(1, {this->m_deviceName, "total_recv_num"});
 }
 
 /* output something */
@@ -198,12 +203,15 @@ void* FlowApp::output() {
         _f->setType(RELAY_ENTITY::IEEE_802_1Q_TSN_FRAME_E);
         _f->setSeq(++flow->seq);
         _f->setData(data, frameSize);
-        _f->setFlowId(1);
+        _f->setFlowId(flow->uniqueID);
         _f->setPhse(0);
         unsigned char mac[ETH_ALEN];
         MacTable::parseMacAddress(flow->groupMac, mac);
         _f->setMac(mac);
         INFO(this->toString() + " construct frame:" + _f->toString());
+
+        std::string flowName = "flow" + std::to_string(flow->uniqueID);
+        ds.add<int>(1, {this->m_deviceName, flowName, "send_num"});
     }
 
     this->iframeCount -= 1;

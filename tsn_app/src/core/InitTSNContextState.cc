@@ -24,9 +24,10 @@ void InitTSNContextState::doAction(TSNContext& context) {
     context.setPortManager(manager);
 
     /* initialize mac table */
-    MacTable::loadRouteXML("./config/routes.xml");
+    std::string profilePath = ConfigSetting::getInstance().get<std::string>("profile.path");
+    MacTable::loadRouteXML(profilePath + "/routes.xml");
     INFO("----- MAC TABLE (unicast) -----\n" + MacTable::toString());
-    MulticastMacTable::loadRouteXML("./config/routes.xml");
+    MulticastMacTable::loadRouteXML(profilePath + "/routes.xml");
     INFO("----- MAC TABLE (multicast) -----\n" + MulticastMacTable::toString());
 
     /* enable reactor */

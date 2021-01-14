@@ -16,6 +16,8 @@ DIR_SRC_NETWORKING_FRAME = $(DIR_SRC_NETWORKING)/frame
 DIR_SRC_NETWORKING_INTERFACE = $(DIR_SRC_NETWORKING)/interface
 DIR_SRC_UTILS_REFLECTOR = $(DIR_SRC_UTILS)/reflector
 DIR_SRC_UTILS_CONFIG = $(DIR_SRC_UTILS)/config
+DIR_SRC_UTILS_CONTAINER = $(DIR_SRC_UTILS)/container
+DIR_SRC_UTILS_MONITOR = $(DIR_SRC_UTILS)/monitor
 DIR_SRC_TIMER = $(DIR_SRC)/timer
 DIR_SRC_NODE = $(DIR_SRC)/node
 
@@ -34,6 +36,8 @@ SRCS	+= $(wildcard $(DIR_SRC_NETWORKING_FRAME)/*.cc)
 SRCS	+= $(wildcard $(DIR_SRC_NETWORKING_INTERFACE)/*.cc)
 SRCS  	+= $(wildcard ${DIR_SRC_UTILS_REFLECTOR}/*.cc)
 SRCS	+= $(wildcard ${DIR_SRC_UTILS_CONFIG}/*.cc)
+SRCS	+= $(wildcard ${DIR_SRC_UTILS_CONTAINER}/*.cc)
+SRCS	+= $(wildcard ${DIR_SRC_UTILS_MONITOR}/*.cc)
 SRCS	+= $(wildcard ${DIR_SRC_TIMER}/*.cc)
 SRCS	+= $(wildcard ${DIR_SRC_NODE}/*.cc)
 MAIN	:= ./src/main.cc
@@ -130,6 +134,12 @@ ${DIR_BIN}/%.o:$(DIR_SRC_UTILS_REFLECTOR)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@ 
 
 ${DIR_BIN}/%.o:$(DIR_SRC_UTILS_CONFIG)/%.cc
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+${DIR_BIN}/%.o:$(DIR_SRC_UTILS_CONTAINER)/%.cc
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+${DIR_BIN}/%.o:$(DIR_SRC_UTILS_MONITOR)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 ${DIR_BIN}/%.o:$(DIR_SRC_NODE)/%.cc

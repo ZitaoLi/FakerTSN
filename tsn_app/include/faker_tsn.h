@@ -38,6 +38,7 @@
 #include "../src/utils/config/ConfigSetting.h"
 #include "../src/utils/reflector/DynamicCreate.h"
 #include "../src/utils/reflector/Reflector.h"
+#include "../src/utils/monitor/DataSpot.h"
 #include "../src/node/INode.h"
 #include "../src/node/TSNHost.h"
 #include "../src/node/TSNSwitch.h"

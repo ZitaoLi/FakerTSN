@@ -28,6 +28,7 @@ TEST_LIBPCAP = $(DIR_BIN_TEST)/test_libpcap
 TEST_NETWORKING = $(DIR_BIN_TEST)/test_networking
 TEST_H2_FORWARD = $(DIR_BIN_TEST)/test_h2_forward
 TEST_H4_RECEIVER = $(DIR_BIN_TEST)/test_h4_receiver
+TEST_MONITOR = $(DIR_BIN_TEST)/test_monitor
 
 GTEST_LIB	= ../lib/gtest/libgtest.a ../lib/gtest/libgtest_main.a ../lib/hello/libhello.a ../lib/tinyxml2/libtinyxml2.a
 
@@ -41,7 +42,7 @@ OBJS = $(filter-out $(DIR_BIN)/main.o, $(wildcard ${DIR_BIN}/*.o))
 TEST_SRCS = $(wildcard ./*.cc)
 TEST_OBJS = $(patsubst %.cc, ${DIR_BIN_TEST}/%.o, $(notdir $(TEST_SRCS)))
 
-TARGETS := $(TEST) $(HELLO) $(TEST_REFLECTOR) $(TEST_CONFIGSETTING) $(TEST_TIMER) $(TEST_QUEUE) $(TEST_TINYXML2) $(TEST_PORT_MANAGER) $(TEST_REACTOR) $(TEST_SENDER) $(TEST_RECEIVER) $(TEST_LIBPCAP) $(TEST_NETWORKING) $(TEST_H2_FORWARD) $(TEST_H4_RECEIVER)
+TARGETS := $(TEST) $(HELLO) $(TEST_REFLECTOR) $(TEST_CONFIGSETTING) $(TEST_TIMER) $(TEST_QUEUE) $(TEST_TINYXML2) $(TEST_PORT_MANAGER) $(TEST_REACTOR) $(TEST_SENDER) $(TEST_RECEIVER) $(TEST_LIBPCAP) $(TEST_NETWORKING) $(TEST_H2_FORWARD) $(TEST_H4_RECEIVER) $(TEST_MONITOR)
 
 all : $(TARGETS)
 
@@ -168,6 +169,13 @@ $(DIR_BIN_TEST)/test_h4_receiver.o : test_h4_receiver.cc $(GTEST_HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(TEST_H4_RECEIVER) : $(DIR_BIN_TEST)/test_h4_receiver.o $(OBJS)
+	$(CXX) $(CXXFLAGS) -lpthread $^ -o $@ $(GTEST_LIB) $(LIBS)
+
+# test_monitor
+$(DIR_BIN_TEST)/test_monitor.o : test_monitor.cc $(GTEST_HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(TEST_MONITOR) : $(DIR_BIN_TEST)/test_monitor.o $(OBJS)
 	$(CXX) $(CXXFLAGS) -lpthread $^ -o $@ $(GTEST_LIB) $(LIBS)
 
 clean :
