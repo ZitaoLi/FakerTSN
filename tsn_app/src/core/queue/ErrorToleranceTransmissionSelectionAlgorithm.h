@@ -11,6 +11,8 @@
 namespace faker_tsn
 {
 
+class DataPort;
+
 class ErrorToleranceTransmissionSelectionAlgorithm : 
     public TransmissionSelectionAlgorithm,
     public REFLECT_OBJECT, 
@@ -19,6 +21,7 @@ class ErrorToleranceTransmissionSelectionAlgorithm :
         std::shared_ptr<InnerBuffer>> {
 private:
     std::shared_ptr<EnhancedGateControlList> m_egcl;
+    std::shared_ptr<DataPort> m_port;
 
     bool isEarly(unsigned long fid, unsigned int phs);
     

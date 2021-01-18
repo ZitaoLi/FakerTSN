@@ -33,7 +33,8 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
     std::shared_ptr<IPortState> state;               /* port state */
     int m_eventTypes = 0;                            /* event type */
     bool m_isEnhanced;                               /* enhanced */
-    BaseRecoveryFunction m_baseRecoveryFunction;
+    BaseRecoveryFunction m_baseRecoveryFunction;     /* frame elimination */
+    bool m_closedOutEvent;                           /* indicate whether to disable EPOLLOUT event or  */
 
    public:
     /* get gate control list */
@@ -42,7 +43,17 @@ class DataPort : public IPort, public std::enable_shared_from_this<DataPort>, pu
     }
 
     /* get queue context */
-    std::shared_ptr<QueueContext> getQueueContext();
+    std::shared_ptr<QueueContext> getQueueContext() {
+        return this->m_queueContext;
+    }
+
+    bool getClosedOutEvent() {
+        return this->m_closedOutEvent;
+    }
+
+    void setClosedOutEvent(bool closed) {
+        this->m_closedOutEvent = closed;
+    }
 
    public:
     /* no. of port */

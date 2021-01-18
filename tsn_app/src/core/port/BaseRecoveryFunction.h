@@ -9,6 +9,7 @@
 #include "../../networking/frame/EnhancementTSNFrameBody.h"
 #include "../../utils/Log.h"
 #include "../../utils/config/ConfigSetting.h"
+#include "../../utils/monitor/DataSpot.h"
 
 namespace faker_tsn
 {

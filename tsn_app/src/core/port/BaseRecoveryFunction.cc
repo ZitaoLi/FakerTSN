@@ -3,6 +3,8 @@
 namespace faker_tsn
 {
 
+extern DataSpot ds;
+
 IFrameBody* BaseRecoveryFunction::handle(IFrameBody* frame) {
     EnhancementTSNFrameBody* eFrame = dynamic_cast<EnhancementTSNFrameBody*>(frame);
 
@@ -21,6 +23,10 @@ IFrameBody* BaseRecoveryFunction::handle(IFrameBody* frame) {
         if (isRepetitive == true) {
             INFO(toString() + " eliminate frame: " + eFrame->toString());
             delete(frame);
+            /* data spot */
+            std::string portName = "port" + std::to_string(m_portId);
+            ds.add<int>(1, {m_deviceName, portName, "eliminated_frame_num"});
+
             return nullptr;
         }
     } else {

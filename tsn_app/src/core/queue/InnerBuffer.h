@@ -9,6 +9,7 @@
 #include "../../networking/frame/IFrameBody.h"
 #include "../../utils/Log.h"
 #include "../../utils/config/ConfigSetting.h"
+#include "../../utils/monitor/DataSpot.h"
 
 namespace faker_tsn {
 
@@ -21,6 +22,7 @@ class InnerBuffer {
     uint32_t m_residualCapacity;      /* residual capacity of buffer */
     uint32_t m_usedCapacity;          /* used capacity of buffer */
     std::deque<IFrameBody*> m_buffer; /* frame body container */
+    long long m_n;
 
    public:
     InnerBuffer(unsigned short portIndex, uint8_t pcp, uint32_t capacity);

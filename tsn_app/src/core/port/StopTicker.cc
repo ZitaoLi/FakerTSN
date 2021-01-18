@@ -25,6 +25,10 @@ void StopTicker::operator()() {
     // ds.append<int>(1, {"switch1", "port0", "queue0", "buf_size"});
     // ds.append<int>(1, {"switch1", "port0", "queue0", "buf_size"});
 
+    /* stop send flow */
+
+    /* sleep */
+
     std::string filename = ConfigSetting::getInstance().get<std::string>("data.path");
     ds.persist(filename);
 

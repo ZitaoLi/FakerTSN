@@ -7,7 +7,7 @@ namespace faker_tsn {
 
 uint8_t DataPort::s_portNum = 0;
 
-DataPort::DataPort(const char* deviceName) : m_deviceID(DataPort::s_portNum++), m_deviceName(deviceName) {
+DataPort::DataPort(const char* deviceName) : m_deviceID(DataPort::s_portNum++), m_deviceName(deviceName), m_closedOutEvent(false) {
     INFO("Construct Port[" + std::to_string(s_portNum) + "|" + std::string(this->m_deviceName) + "] created");
     this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
     this->m_baseRecoveryFunction = BaseRecoveryFunction(s_portNum);
@@ -244,10 +244,6 @@ void DataPort::setTimer() {
     /* register gate control list item into timer */
     INFO("register GCL items");
     this->m_gcl->registerGCLfromSchedules();
-}
-
-std::shared_ptr<QueueContext> DataPort::getQueueContext() {
-    return this->m_queueContext;
 }
 
 }  // namespace faker_tsn

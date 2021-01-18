@@ -38,7 +38,7 @@ void FlowTicker::operator()() {
     }
     // next ideal interval
     Time::TimePoint nextStartTime(0, 0);
-    Time::TimeInterval interval2 = flow->durationInterval - deviation;
+    Time::TimeInterval interval2 = flow->periodInterval - deviation;
     INFO("  interval2\t " + interval2.toString());
 
     // add next ticker
