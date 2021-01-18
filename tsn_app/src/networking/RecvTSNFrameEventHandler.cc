@@ -2,13 +2,20 @@
 
 namespace faker_tsn {
 
+extern DataSpot ds;
+
 const __be16 RecvTSNFrameEventHandler::s_protocol = htons(ETH_P_TSN);
 
 RecvTSNFrameEventHandler::RecvTSNFrameEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port) : m_handle(handle), m_port(port) {
     memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
+    /* set enhanced mode */
     this->m_isEnhanced = ConfigSetting::getInstance().get<bool>("enhancedGCL");
+    /* set work mode */
     std::string workMode = ConfigSetting::getInstance().get<std::string>("workMode");
     this->m_isSwitch = (workMode == "switch") ? true : false;
+    /* set packer error rate */
+    double per = ConfigSetting::getInstance().get<double>("switch.port.per");
+    this->m_u = std::bernoulli_distribution(per);
 }
 
 RecvTSNFrameEventHandler::~RecvTSNFrameEventHandler() {
@@ -32,6 +39,18 @@ void RecvTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
     /* because the frame send to interface will be receive again */
     if (memcmp(recvbuf + 6, this->m_sockAddrII.sll_addr, 6) == 0) {
         // INFO("------------- ring frame --------------");
+        return;
+    }
+
+    /* discard randomly */
+    this->m_e.seed(time(0));
+    bool p = this->m_u(this->m_e);
+    INFO("discard? " + std::to_string(p));
+    if (p == true) {
+        ERROR("discard frame");
+        std::string deviceName = this->m_port->getDeviceName();
+        std::string portName = "port" + std::to_string(this->m_port->getDeviceID());
+        ds.add<int>(1, {deviceName, portName, "discarded_frame"});
         return;
     }
 
