@@ -14,14 +14,18 @@ void persistHelper(std::ofstream& os, Trie* node, std::string str, void* data, u
         os << std::hex;
         os << str << "=";
         if (data) {
-            char* buf = (char*)malloc(len * (size + 1));
-            for (int i = 0; i < len * size; i++) {
-                // sprintf(buf, "%02X ", ((char*)data)[i]);
-                os << std::setw(2) << std::setfill('0') << to_uint(((char*)data)[i]) << " ";
-            }
-            // os << buf;
-            os << "\n";
-            free(buf);
+            // TODO
+            int n = *((int*)data);
+            os << std::to_string(n) << "\n";
+
+            // char* buf = (char*)malloc(len * (size + 1));
+            // for (int i = 0; i < len * size; i++) {
+            //     // sprintf(buf, "%02X ", ((char*)data)[i]);
+            //     os << std::setw(2) << std::setfill('0') << to_uint(((char*)data)[i]) << " ";
+            // }
+            // // os << buf;
+            // os << "\n";
+            // free(buf);
         }
         return;
     }

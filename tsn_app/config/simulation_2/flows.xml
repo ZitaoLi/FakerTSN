@@ -4,30 +4,25 @@
 	<cycle>4000000</cycle>	<!-- 4000 ms -->
 
 	<host name="host1">
-		<entry>
-			<!-- us -->
+		<!-- <entry>
 			<start>0</start>
 			<duration>1000000</duration>
 			<period>4000000</period>
 			<pcp>7</pcp>
+
 			<dest>00:00:00:00:00:00</dest>
 			<group>01-00-5E-00-00-04</group>
-			<!-- byte -->
-			<!-- maximum = 1490B -->
-			<size>1500</size>
+			<size>15000</size>
 			<uniqueID>1</uniqueID>
-		</entry>
+		</entry> -->
 		<entry>
-			<!-- us -->
 			<start>1000000</start>
 			<duration>1000000</duration>
-			<period>2000000</period>
+			<period>4000000</period>
 			<pcp>7</pcp>
 			<dest>00:00:00:00:00:00</dest>
 			<group>01-00-5E-00-00-05</group>
-			<!-- byte -->
-			<!-- maximum = 1490B -->
-			<size>1500</size>
+			<size>150000</size>
 			<uniqueID>2</uniqueID>
 		</entry>
 	</host>
@@ -43,7 +38,7 @@
 			<group>01-00-5E-00-00-06</group>
 			<!-- byte -->
 			<!-- maximum = 1490B -->
-			<size>1500</size>
+			<size>15000</size>
 			<uniqueID>3</uniqueID>
 		</entry>
 	</host>
