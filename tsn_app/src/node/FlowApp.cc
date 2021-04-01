@@ -166,6 +166,14 @@ void FlowApp::input(void* data, size_t len, RELAY_ENTITY type) {
         ds.add<int>(1, {this->m_deviceName, flowName, "recv_num"});
     }
     ds.add<int>(1, {this->m_deviceName, "total_recv_num"});
+
+    // print recv num
+    this->iframeCount += 1;
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    std::string cmd = "echo \"" + std::to_string(ms) + "," + std::to_string(this->iframeCount) + "\"> ./config/simulation_0/recv.data";
+    system(cmd.c_str());
 }
 
 /* output something */
@@ -215,6 +223,14 @@ void* FlowApp::output() {
     }
 
     this->iframeCount -= 1;
+    this->oframeCount += 1;
+
+    // print send num
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    std::string cmd = "echo \"" + std::to_string(ms) + "," + std::to_string(this->oframeCount) + "\"> ./config/simulation_0/send.data";
+    system(cmd.c_str());
 
     return (void*)frame;
 }

@@ -148,6 +148,10 @@ void SendTSNFrameEventHandler::handle_event(EVENT_TYPE eventType) {
         INFO("Send success!");
     else
         ERROR("Send error: " + std::string(strerror(errno)));
+    
+    // free memory
+    delete frameBody;
+    free(data);
 }
 
 }  // namespace faker_tsn

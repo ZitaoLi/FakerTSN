@@ -40,6 +40,14 @@ void GateControlTicker::operator()() {
     // precision
     Time::TimeInterval precision = Time::converIntegerToTimeInterval(TimeContext::getInstance().getTimer()->getPrecision(), "ns");
     INFO("[" + std::to_string(this->m_gcl->getPortId()) + "] precision\t " + precision.toString());
+    
+    // print deviation
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    std::string cmd = "echo \"" + std::to_string(ms) + "," + std::to_string(deviation.nsec) + "\">> ./config/simulation_0/error.log";
+    system(cmd.c_str());
+
     if (deviation >= precision) {
         ERROR("[" + std::to_string(this->m_gcl->getPortId()) + "] out of precision: " + deviation.toString());
         // TODO record
