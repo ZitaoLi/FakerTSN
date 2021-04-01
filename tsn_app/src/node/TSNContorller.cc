@@ -6,11 +6,11 @@ namespace faker_tsn
 TSNController::TSNController(const char* deviceName) : 
     m_deviceName(deviceName), 
     m_command("") {
-    INFO(this->toString() + " construct FlowApp");
+    INFO(this->toString() + " construct TSNController");
 }
 
 TSNController::~TSNController() {
-    INFO(this->toString() + " desstruct FlowApp");
+    INFO(this->toString() + " desstruct TSNController");
     shutdown(this->m_iSockfd, SHUT_RDWR);
     shutdown(this->m_oSockfd, SHUT_RDWR);
     close(this->m_iSockfd);
@@ -72,7 +72,7 @@ void TSNController::registerEventHandler() {
     struct sockaddr_ll* addr_ll;
     this->m_inf->getMacAddress()->getRawSockAddr((struct sockaddr**)&addr_ll);
     /* register for outbound socket */
-    std::shared_ptr<IEventHandler> oHandler = std::make_shared<CommandEventHandler>(this->m_oSockfd, *addr_ll, this);
+    std::shared_ptr<IEventHandler> oHandler = std::make_shared<CommandEventHandler>(this->m_oSockfd, addr_ll, this);
     Reactor::getInstance().register_handler(oHandler, EVENT_TYPE::WRITE);
     INFO(this->toString() +  "register CommandEventHandler in Reactor");
 }

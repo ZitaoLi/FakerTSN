@@ -54,6 +54,17 @@ void ConsolePort::createSocket() {
     if (deviceName == "stdin") {
         this->m_sockfd = STDIN_FILENO; // standard input
         INFO(this->toString() + " console socket is STDIN");
+    } else if (deviceName == "fifo") {
+        const char* fifoPath = "/tmp/faker_tsn_fifo";
+        if (mkfifo(fifoPath, 0666) < 0 && errno != EEXIST) {
+            ERROR(this->toString() + "fail to create fifo");
+            throw PortCreationException();
+        }
+        this->m_sockfd = open(fifoPath, O_CREAT|O_RDONLY|O_NONBLOCK);
+        if (this->m_sockfd < 0) {
+            ERROR(this->toString() + "fail to open fifo");
+            throw PortCreationException();
+        }
     } else {
         this->m_sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         if (this->m_sockfd == -1) {
@@ -88,15 +99,11 @@ void ConsolePort::createSocket() {
 }
 
 void ConsolePort::registerEventHandler() {
-    /* fill in struct sockaddr_ll */
-    struct sockaddr_ll* addr_ll;
-    if (this->m_sockfd != STDIN_FILENO)
-        this->m_interface->getMacAddress()->getRawSockAddr((struct sockaddr**)&addr_ll);
     /* register handler */
     std::shared_ptr<IEventHandler> handler;
     std::string workMode = ConfigSetting::getInstance().get<std::string>("workMode");
     if (workMode == "configurator") {
-        handler = std::make_shared<CommandEventHandler>(this->m_sockfd, *addr_ll, this);
+        handler = std::make_shared<CommandEventHandler>(this->m_sockfd, nullptr, this);
     } else {
         handler = std::make_shared<ControlEventHandler>(this->m_sockfd);
     }

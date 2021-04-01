@@ -5,8 +5,10 @@
 namespace faker_tsn
 {
 
-CommandEventHandler::CommandEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port) : m_handle(handle), m_port(port) {
-    memcpy(&this->m_sockAddrII, &sockAddrII, sizeof(sockAddrII));
+CommandEventHandler::CommandEventHandler(HANDLE handle, struct sockaddr_ll* sockAddrII, IPort* port) : m_handle(handle), m_port(port) {
+    this->m_deviceName = ConfigSetting::getInstance().get<std::string>("switch.port.cons");
+    if (sockAddrII != nullptr)
+        memcpy(&this->m_sockAddrII, sockAddrII, sizeof(struct sockaddr_ll));
 }
 
 CommandEventHandler::~CommandEventHandler() {
@@ -17,7 +19,20 @@ void CommandEventHandler::handle_input() {
     INFO("CommandEventHandler<IN> on call");
 
     std::string iCommand;
-    getline(std::cin, iCommand);
+
+    if (this->m_deviceName == "stdin") {
+        getline(std::cin, iCommand);
+    } else if (this->m_deviceName == "fifo") {
+        // echo -e 'run 2 10\c' > /tmp/faker_tsn_fifo
+        FILE *fp = NULL;
+        char buf[100];
+        fp = fdopen(this->m_handle, "r");
+        fgets(buf, 100, fp);
+        iCommand = std::string(buf);
+    } else {
+        ERROR("unknow type of console port");
+        exit(EXIT_FAILURE);
+    }
     INFO("<<< " + iCommand);
 
     /* transform command */

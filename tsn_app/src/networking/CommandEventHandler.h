@@ -18,6 +18,7 @@ private:
     HANDLE m_handle;
     struct sockaddr_ll m_sockAddrII;
     IPort* m_port;
+    std::string m_deviceName;
 
 private:
     void handle_input();
@@ -25,7 +26,7 @@ private:
     void handle_output();
 
 public:
-    CommandEventHandler(HANDLE handle, struct sockaddr_ll& sockAddrII, IPort* port);
+    CommandEventHandler(HANDLE handle, struct sockaddr_ll* sockAddrII, IPort* port);
 
     virtual ~CommandEventHandler() override;
 

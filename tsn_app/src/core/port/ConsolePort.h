@@ -2,6 +2,7 @@
 #define _CONSOLE_PORT_H
 
 #include <sstream>
+#include <sys/stat.h>
 
 #include <fcntl.h>
 
