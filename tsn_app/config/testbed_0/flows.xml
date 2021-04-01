@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<schedule sizeUnit="B" timeUnit="us">
+	<!-- us -->
+	<cycle>4000000</cycle>	<!-- 4000 ms -->
+
+	<host name="host1">
+		<!-- <entry>
+			<start>0</start>
+			<duration>1000000</duration>
+			<period>4000000</period>
+			<pcp>7</pcp>
+
+			<dest>00:00:00:00:00:00</dest>
+			<group>01-00-5E-00-00-04</group>
+			<size>15000</size>
+			<uniqueID>1</uniqueID>
+		</entry> -->
+		<entry>
+			<start>1000000</start>
+			<duration>1000000</duration>
+			<period>4000000</period>
+			<pcp>7</pcp>
+			<dest>00:00:00:00:00:00</dest>
+			<group>01-00-5E-00-00-05</group>
+			<size>150000</size>
+			<uniqueID>2</uniqueID>
+		</entry>
+	</host>
+
+	<host name="host2">
+		<entry>
+			<!-- us -->
+			<start>500000</start>
+			<duration>1000000</duration>
+			<period>2000000</period>
+			<pcp>7</pcp>
+			<dest>00:00:00:00:00:00</dest>
+			<group>01-00-5E-00-00-06</group>
+			<!-- byte -->
+			<!-- maximum = 1490B -->
+			<size>15000</size>
+			<uniqueID>3</uniqueID>
+		</entry>
+	</host>
+</schedule>

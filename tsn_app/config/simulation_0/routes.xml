@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8'?>
+<filteringDatabases>
+  <filteringDatabase id="c1">
+    <static>
+      <ports>
+        <port id="0" name="c1-eth0" peerMacAddress="1a:a6:bd:6f:b3:ad" macAddress="00-00-00-00-00-05"/>
+        <port id="1" name="c1-eth1" peerMacAddress="92:8b:3a:5e:48:ef" macAddress="96:96:4c:38:41:88"/>
+        <port id="2" name="c1-eth2" peerMacAddress="92:5b:da:31:00:f9" macAddress="22:63:45:e9:d5:84"/>
+        <port id="3" name="c1-eth3" peerMacAddress="6e:b1:28:6c:59:dd" macAddress="f6:29:f3:89:e9:0a"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-01"/>
+        <multicastAddress ports="0 1 2 3" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="host1">
+    <static>
+      <ports>
+        <port id="0" name="h1-eth0" peerMacAddress="00-00-00-00-00-02" macAddress="00-00-00-00-00-01"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-01"/>
+        <multicastAddress ports="0" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="host3">
+    <static>
+      <ports>
+        <port id="0" name="h3-eth0" peerMacAddress="36:89:70:2f:60:fd" macAddress="00-00-00-00-00-03"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-03"/>
+        <multicastAddress ports="0" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="host4">
+    <static>
+      <ports>
+        <port id="0" name="h4-eth0" peerMacAddress="5e:ba:9b:ce:47:05" macAddress="00-00-00-00-00-05"/>
+      </ports>
+      <forward>
+        <individualAddress port="0" macAddress="00-00-00-00-00-04"/>
+        <multicastAddress ports="0" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+
+  <filteringDatabase id="switch2">
+    <static>
+      <ports>
+        <port id="0" name="s2-eth0" peerMacAddress="00-00-00-00-00-01"/>
+        <port id="1" name="s2-eth1" peerMacAddress="00-00-00-00-00-03"/>
+        <port id="2" name="s2-eth2" peerMacAddress="00-00-00-00-00-04"/>
+      </ports>
+      <forward>
+        <individualAddress port="1" macAddress="00-00-00-00-00-01"/>
+        <multicastAddress ports="1 2" macAddress="01-00-5E-00-00-01"/>
+      </forward>
+    </static>
+  </filteringDatabase>
+</filteringDatabases>
