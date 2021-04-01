@@ -45,6 +45,7 @@ class TSNFrameBody : public IFrameBody {
         newFrame->setPCP(oldFrame->getPCP());
         newFrame->setSeq(oldFrame->getSeq());
         newFrame->setVID(oldFrame->getVID());
+        free(buf);
         return newFrame;
     }
 

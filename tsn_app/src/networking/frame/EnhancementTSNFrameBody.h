@@ -49,6 +49,7 @@ class EnhancementTSNFrameBody : public IFrameBody {
         unsigned char mac[ETH_ALEN];
         oldFrame->getMac(mac);
         newFrame->setMac(mac);
+        free(buf);
         return newFrame;
     }
 
