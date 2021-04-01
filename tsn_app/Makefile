@@ -64,6 +64,7 @@ INCLUDES:= -I$(DIR_INC)
 CFLAGS  := -Wall $(DEFINES) $(INCLUDES) -MD
 ifeq ($(DEBUG), y)
 CFLAGS	+= -g
+# CFLAGS	+=
 else
 CFLAGS	+= -O3
 endif
