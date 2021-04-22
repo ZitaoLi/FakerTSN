@@ -2,6 +2,7 @@
 
 #include "../TSNContext.h"
 #include "../RunTSNContextState.h"
+#include "../../utils/monitor/MonitorTicker.h"
 
 namespace faker_tsn
 {
@@ -29,6 +30,12 @@ void StartTicker::operator()() {
         port->setTimer();
         Reactor::getInstance().getDemultoplexer().updateHandle(port->getOutSockfd(), EPOLLOUT);
     }
+
+    /* register monitor ticker */
+    Time::TimePoint start(0, 0);
+    Time::TimeInterval expire(1, 0);
+    Ticker* ticker = new MonitorTicker(start, expire);
+    TimeContext::getInstance().getTimer()->addTicker(ticker);
 
     /* start timer */
     TimeContext::getInstance().getTimer()->start();
