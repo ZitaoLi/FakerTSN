@@ -17,44 +17,81 @@ graph LR
 
 ### 工作模式
 
-- host：以TSN终端模式工作
-- switch：以TSN交换机模式工作
-- configurator：以TSN网络配置器模式工作
+测试床支持三种工作方式，通过`config.ini`文件的`workMode`配置项修改：
+
+- `host`：以TSN终端模式工作
+- `switch`：以TSN交换机模式工作
+- `configurator`：以TSN网络配置器模式工作
 
 ### 上下文
 
-- InitTSNContext
-- RunTSNContext
-- StopTSNContext
+```mermaid
+stateDiagram
+    [*] --> TSNContext
+    state TSNContext {
+        [*] --> InitTSNContextState
+        InitTSNContextState --> RunTSNContextState
+        RunTSNContextState --> StopTSNContextState
+        InitTSNContextState --> StopTSNContextState
+    }
+```
+
+测试床维持着一个上下文`TSNContext`，它的生命周期经历三个状态，使用状态模式和单例模式实现：
+
+- InitTSNContextState：初始化状态，在此期间完成测试床的初始化工作，例如读取配置文件
+- RunTSNContextState：运行状态，在此期间测试床正常工作
+- StopTSNContextState：停止状态，在此期间测试床停止工作，执行收尾工作
+
+除此之外，测试床还维持这一个时间上下文`TimeContext`，用于记录时间状态，同样使用单例模式实现。
 
 ### 配置文件
-- config.ini
-- routes.xml
-- gcl.xml
-- flows.xml
 
-## 定时器
+测试床依赖的配置文件有：
+
+- config.ini：测试床配置文件
+- routes.xml：路由配置文件
+- gcl.xml：调度配置文件
+- flows.xml：流配置文件
+
+运行测试床可执行文件时必须通过参数`-f`指定一个`config.ini`文件。
+
+## 运行时环境
+
+### 时间库
 
 ```mermaid
 classDiagram
     class TimeInterval {
-
+        +operator=() TimeInterval
+        +operator>=(ti1 TimeInterval, ti2 TimeInterval) bool
+        +operator-(ti1 TimeInterval, ti2 TimeInterval) TimeInterval
     }
 
     class TimePoint {
-        
+        +operator=() TimePoint
+        +operator>=(tp1 TimePoint, tp2 TimePoint) bool
+        +operator<(tp1 TimePoint, tp2 TimePoint) bool
+        +operator-(tp1 TimePoint, tp2 TimePoint) TimePoint
+        +operator-(tp1 TimePoint, ti2 TimeInterval) TimePoint
+        +operator+(tp1 TimePoint, ti2 TimeInterval) TimePoint
     }
 
     class Ticker {
-
+        +operator()() void
+        +operator<(tk1 Ticker, tk2 Ticker) bool
     }
 
     class ITimer {
-
+        +start() void
+        +addTicker() void
+        +removeTicker(id unsigned long) void
+        +getPrecision() Ticker
+        +getTicker() Ticker
+        +getTicker(id unsigned long) Ticker
     }
 
     class IClock {
-
+        +now() TimePoint
     }
 
     class RealTimeClock {
@@ -80,7 +117,7 @@ TSN网络设备的调度行为是由时间触发的，时间触发可以通过�
 
 TSN网络对时间精度有着极高的要求（通常是微妙级别），考虑到硬件条件的限制（缺乏专用的高精度时钟芯片支持）以及内核态和用户态之间的切换开销（我们的程序运行在用户态，使用系统调用时需要在内核态和用户态之间进行切换），测试床的时间精度的设定在毫秒级别。
 
-测试床的定时器具体实现：
+测试床的时间库具体实现：
 
 - TimeInterval（时间段）：一段连续的时间，用来表示时间的长度。时间段的实现参考了Linux 常用时间结构体（struct timespec），其中第一个属性是秒，第二个属性是纳秒，重载了加减运算符，能够实现时间点与时间点、时间点与时间段之间的加减运算
 - TimePoint（时间点）：特殊的时间段，长度从纪元时间(从UTC时间1970年1月1日0时0分0秒)开始的算起，重载了加减运算符，能够实现时间点与时间点、时间点与时间段之间的加减运算
@@ -91,8 +128,25 @@ TSN网络对时间精度有着极高的要求（通常是微妙级别），考�
   - StopTicker：将上下文切换到`Stop`状态，释放系统资源，冲刷缓冲区
   - GateControlTicker：根据`TimeAwareShaper`的指示周期性刷新`TransmissionGate`的状态
   - MonitorTicker：周期性写监控数据到磁盘
+- ITimer（定时器）:定时器接口，通过操作Ticker来实现时间触发事件。
+  - PQTimer：优先级队列时钟，它维护着一个Ticker容器，该容器利用最小堆实现，根据Ticker的启动时间升序排序，执行`start()`后循环弹出Ticker，使用POSIX时间库提供的标准接口向系统注册一个时间事件，绑定`on_alar()`回调函数，直到容器为空。当时间事件到期时，系统回调`on_alar()`函数，将到期的Ticker实例指针作为参数传递给`on_alar()`函数，再由`on_alar()`以仿函数的形式调用该Ticker实例，执行具体的动作
 
-## IO事件框架
+使用实例：
+
+```
+/* 创建Ticker */
+Time::TimePoint start(0, 0); // 启动时间
+Time::TimeInterval expire(1, 0); // 超时时间
+Ticker* ticker = new MonitorTicker(start, expire);
+/* 通过时间上下文获取定时器 */
+ITimer* timer = TimeContext::getInstance().getTimer();
+/* 添加Ticker到定时器 */
+timer->addTicker(ticker);
+/* 启动定时器 */
+TimeContext::getInstance().getTimer()->start();
+```
+
+### IO事件库
 
 ```mermaid
 classDiagram
@@ -158,7 +212,15 @@ Reactor设计模式主要成分：
 - Selector封装了epoll，只支持水平触发（Level-triggered）模式，在该模式下一旦内核缓冲区处于就绪状态就会立即触发IO事件，具有极高的响应速度
 - Reactor利用关联容器保存操作句柄与具体的事件处理器程序的关联关系，提供事件注册和事件移除等方法，利用Selector分发事件到具体事件处理程序
 
-## Port
+### 反射库
+
+#### 静态反射
+
+#### 动态反射
+
+## 实现 
+
+### Port
 
 ```mermaid
 classDiagram
@@ -185,13 +247,17 @@ classDiagram
 
 每个物理网卡对应一个IPort类型对象。
 
-每个IPort类型对象的生命周期包括：`Create`、`Up`和`Down`，使用状态模式和模版方法模式实现。
+每个IPort类型对象的生命周期经历三个状态：`Creation`、`Up`和`Down`，使用状态模式和模版方法模式实现。
+
+- `CreationPortState`
+- `UpPortState`
+- `DownPortState`
 
 IPort是一个接口类型，所有IPort类型实例均实现自Iport接口，并重写（override）纯虚函数，例如DataPort，其中几个模版方法必须按具体功能需求具体实现：
 
-- createSocket：构造对象。对象的初始化过程都应该放在这个方法里，在这过程中可能会暴露`this`指针，不能放在构造函数中进行，因此采用二段式构造
-- registerEventHandler：注册IO事件处理程序，例如RecvTSNFrameEventHandler。
-- setTimer：注册事件事件处理程序，例如GateControlTicker。
+- `createSocket`：构造对象。对象的初始化过程都应该放在这个方法里，在这过程中可能会暴露`this`指针，不能放在构造函数中进行，因此采用二段式构造
+- `registerEventHandler`：注册IO事件处理程序，例如RecvTSNFrameEventHandler。
+- `setTimer`：注册事件事件处理程序，例如GateControlTicker。
 
 已有IPort类型实例包括：
 
