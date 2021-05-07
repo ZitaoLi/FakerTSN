@@ -216,9 +216,155 @@ Reactor设计模式主要成分：
 
 #### 静态反射
 
+静态反射是在程序编译期间通过宏定义展开实现的，因此也叫编译期反射，它的优点是不会在运行期间产生开销，缺点是对于那些需要具有有参构造函数的类来说使用很不方便，需要另外实现一个`init`函数来完成初始化操作。
+
+```mermaid
+classDiagram
+    class ReflectObject {
+
+    }
+
+    class ObjectFactory {
+        +newInstance() (ReflectObject*)
+    }
+
+    class ObjectFactory_XX {
+        +newInstance() (ReflectObject*)
+    }
+
+    class Reflector {
+        -map<string, ObjectFactory*> objectFactories
+        +registerFactory(className string, objectFactory ObjectFactory*) void
+        +getNewInstance(className string) (T*)
+        +getReflector() (Reflector&)
+    }
+
+    Reflector --> ObjectFactory
+    ObjectFactory --> ReflectObject
+    ObjectFactory --> ObjectFactory_XX
+    Reflector --> ReflectObject
+```
+
+需要反射的类必须实现`ReflectObject`接口，因此这种反射方式属于侵入式反射：
+
+```
+class Person : public ::ReflectObject {
+   public:
+    Person() {
+        INFO("Person Constructor");
+    }
+    virtual ~Person() = default;
+    virtual void show() {
+        INFO("Person");
+    }
+};
+
+class Bob : public Person {
+   public:
+    Bob() {
+        INFO("Bob Constructor");
+    }
+    virtual void show() override {
+        INFO("Bob");
+    }
+};
+```
+
+实现了`ReflectObject`接口的类可以作为父类，但是其子类就不允许再被继承了，否则会有bug。
+
+需要在源文件中显式地调用宏函数`REFLECT`来注册需要反射的类，该函数会在编译期原地展开成为一个`ObjectFactory`实例，例如`ObjectFactory_Bob`：
+
+```
+REFLECT(Bob);    // register "Bob"
+```
+
+注册好后就可以在需要时候使用下面代码来进行反射：
+
+```
+Person* bob = ::Reflector::getNewInstance<Person>("Bob");
+bob->show();
+```
+
 #### 动态反射
 
-## 实现 
+动态反射是在程序运行期间通过宏定义展开实现的，因此也叫运行期反射。
+
+动态反射的实现则比较复杂，需要借助标准库中的`std::function`、模版和ABI来实现。
+
+```mermaid
+classDiagram
+    class REFLECT_OBJECT {
+
+    }
+
+    class REFLECT_OBJECTFactory {
+        -map<string, function<REFLECT_OBJECT*(Targs&&...)> m_mapCreateFunction
+        -REFLECT_OBJECTFactory<Targs...>* s_pREFLECT_OBJECTFactory
+        +Instance() (REFLECT_OBJECTFactory*)
+        +Regist(string typeName, pFunc function<REFLECT_OBJECT*(Targs&&... args)>) bool
+        +UnRegist(string typeName) bool
+        +Create(const string& strTypeName, Targs&&... args) (REFLECT_OBJECT*)
+    }
+
+    class DynamicCreator {
+        -Register s_oRegister
+        +CreateObject(Targs&&... args) (T*)
+    }
+
+    class Register {
+
+    }
+
+    class REFLECTOR {
+        +CreateByTypeName(const std::string& strTypeName, Targs&&... args) (REFLECT_OBJECT*)
+    }
+
+    REFLECTOR --> REFLECT_OBJECTFactory
+    REFLECT_OBJECTFactory --> REFLECT_OBJECT
+    DynamicCreator --> Register
+    Register ..> REFLECT_OBJECTFactory
+```
+
+`DynamicCreator::s_oRegister`是静态成员，它的类型是`DynamicCreator<T, Targs...>::Register`，在程序一开始就完成初始化，其构造函数内部调用`REFLECT_OBJECTFactory<Targs...>::Regist`方法来注册一个反射类型。
+
+`REFLECT_OBJECTFactory<Targs...>::Regist`方法接收两个参数
+
+- 一个是`std::string`类型的字符串，表示类型名称
+- 一个是`std::function<REFLECT_OBJECT*(Targs&&... args)>`类型的函数，实际传入的是`DynamicCreator::CreateObject`函数，该函数支持传入可变长参数，用来调用反射类型的构造函数。
+
+`REFLECT_OBJECTFactory<Targs...>`类型是一个单例，`REFLECTOR`通过调用其`Create`方法来构造出一个`REFLECT_OBJECT`类型的对象。
+
+需要反射的类需要实现`REFLECT_OBJECT`接口并继承`DynamicCreato<T>`，因此这种方式也属于入侵式反射：
+
+```
+class IAnimal {
+public:
+    virtual ~IAnimal() = default;
+    virtual void Say() = 0;
+};
+
+class Dog : public IAnimal, public REFLECT_OBJECT, public DynamicCreator<Dog> {
+public:
+    Dog(std::string name) { 
+        std::cout << "My name is " << name << std::endl;
+    }
+    virtual ~Dog() override = default;
+
+    virtual void Say() override {
+        INFO("wang\n");
+    }
+};
+
+```
+
+使用时非常简单，只需要使用下面代码：
+
+```
+REFLECT_OBJECT* dog = REFLECTOR::CreateByTypeName(std::string("Dog"), std::string("Xiaobai"));
+dog->Say();
+```
+
+## 核心组件
 
 ### Port
 
@@ -247,6 +393,17 @@ classDiagram
 
 每个物理网卡对应一个IPort类型对象。
 
+```mermaid
+stateDiagram
+    [*] --> IPort
+    state IPort {
+        [*] --> CreationPortState
+        CreationPortState --> UpPortState
+        CreationPortState --> DownPortState
+        UpPortState --> DownPortState
+    }
+```
+
 每个IPort类型对象的生命周期经历三个状态：`Creation`、`Up`和`Down`，使用状态模式和模版方法模式实现。
 
 - `CreationPortState`
@@ -266,4 +423,4 @@ IPort是一个接口类型，所有IPort类型实例均实现自Iport接口，�
 - TSNController：TSN网络配置器的控制端口，负责向TSN网络设备发送控制指令
 - FlowApp：TSN终端的数据端口，负责构建、接收和发送链路层PDU
 
-![](https://github.com/ZitaoLi/FakerTSN/tsn_app/doc/img/Dev-WorkFlow.svg)
+![](https://github.com/ZitaoLi/FakerTSN/blob/master/tsn_app/doc/img/Dev-WorkFlow.svg)
